@@ -7,9 +7,11 @@ import java.util.List;
 public final class VariationWithoutRepetition<T> {
 
     private final InputValidator<T> inputValidator;
+    private final RandomFrictionQuery randomFrictionQuery;
 
-    public VariationWithoutRepetition() {
+    public VariationWithoutRepetition(RandomFrictionQuery randomFrictionQuery) {
         this.inputValidator = new InputValidator<>();
+        this.randomFrictionQuery = randomFrictionQuery;
     }
 
     public List<T> choose(Collection<ChoosableWrapper<T>> objects, int k) {
