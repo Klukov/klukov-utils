@@ -26,13 +26,18 @@ class VariationWithoutRepetitionTest extends Specification {
 
     def "should return proper number of elements"() {
         def choosables = ChoosableDataGenerator.sampleStringChoosables()
-        randomFrictionQuery.getRandomFraction() >> 0.8
+        randomFrictionQuery.getRandomFraction() >> 0.9
 
         when:
         def result = sub.choose(choosables, k)
 
         then:
         result.size() == expectedObjects
+        def index = choosables.size() - 1
+        result.each { it ->
+            assert it == choosables[index].wrappedObject()
+            index--
+        }
 
         where:
         k || expectedObjects
@@ -40,22 +45,7 @@ class VariationWithoutRepetitionTest extends Specification {
         2 || 2
         3 || 3
         4 || 4
-    }
-
-    def "should return all elements if k is equal to collection size"() {
-        given:
-        def choosables = ChoosableDataGenerator.sampleStringChoosables()
-        randomFrictionQuery.getRandomFraction() >>> [0.8, 0.8, 0.8, 0.8]
-
-        when:
-        def result = sub.choose(choosables, choosables.size())
-
-        then:
-        result.size() == choosables.size()
-        result[0] == choosables[3].wrappedObject
-        result[1] == choosables[2].wrappedObject
-        result[2] == choosables[1].wrappedObject
-        result[3] == choosables[0].wrappedObject
+        5 || 5
     }
 
     def "should return single element when k is equal 1"() {
@@ -72,9 +62,41 @@ class VariationWithoutRepetitionTest extends Specification {
 
         where:
         random || expectedElement
-        0.8    || 3
-        0.45   || 2
-        0.2    || 1
-        0.05   || 0
+        1.0    || 4
+        0.8    || 4
+        0.7    || 4
+        0.6    || 3
+        0.5    || 3
+        0.4    || 3
+        0.3    || 2
+        0.2    || 2
+        0.1    || 1
+        0.01   || 0
+        0.0    || 0
+    }
+
+    def "should return correct elements"() {
+        given:
+        def choosables = ChoosableDataGenerator.sampleStringChoosables()
+        randomFrictionQuery.getRandomFraction() >>> random
+
+        when:
+        def result = sub.choose(choosables, k)
+
+        then:
+        result.size() == expectedObjects.size()
+        (0..expectedObjects.size() - 1).each { index ->
+            assert result[index] == choosables[expectedObjects[index]].wrappedObject
+        }
+
+        where:
+        k | random                         || expectedObjects
+        5 | [0.8, 0.8, 0.8, 0.8, 0.8]      || [4, 3, 2, 1, 0]
+        5 | [0.8, 0.8, 0.8, 0.8, 0.8]      || [4, 3, 2, 1, 0]
+        5 | [0.05, 0.05, 0.05, 0.05, 0.05] || [0, 1, 2, 3, 4]
+        4 | [0.5, 0.5, 0.2, 0.1]           || [3, 2, 1, 0]
+        4 | [0.3, 0.8, 0.1, 0.8]           || [2, 4, 0, 3]
+        3 | [0.01, 0.01, 0.01]             || [0, 1, 2]
+        2 | [0.3, 0.1]                     || [2, 1]
     }
 }

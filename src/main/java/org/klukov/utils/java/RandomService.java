@@ -1,4 +1,4 @@
-package org.klukov.utils;
+package org.klukov.utils.java;
 
 import org.klukov.utils.combinatorics.choose.RandomFrictionQuery;
 
