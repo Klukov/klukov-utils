@@ -5,7 +5,7 @@ import org.klukov.utils.combinatorics.choose.RandomFrictionQuery;
 import java.math.BigDecimal;
 import java.util.Random;
 
-class RandomService implements RandomFrictionQuery {
+public class RandomService implements RandomFrictionQuery {
 
     @Override
     public BigDecimal getRandomFraction() {
