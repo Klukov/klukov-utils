@@ -6,7 +6,27 @@ import spock.lang.Subject
 class ParentGivenGraphParserTest extends Specification {
 
     @Subject
-    ParentGivenGraphParser<ParentGivenNodeInputTestImpl> sub = new ParentGivenGraphParser<>()
+    ParentGivenGraphParser<String, ParentGivenNodeInputTestImpl> sub = new ParentGivenGraphParser<>()
+
+    def "should throw exception if graph is null or empty"() {
+
+    }
+
+    def "should throw exception if start element is null"() {
+
+    }
+
+    def "should throw exception if graph does not contain start node id"() {
+
+    }
+
+    def "should throw exception if any node is null or has id with null value"() {
+
+    }
+
+    def "should throw exception if graph contains ids duplicates"() {
+
+    }
 
     def "should parse single element graph"() {
         given:
@@ -60,7 +80,7 @@ class ParentGivenGraphParserTest extends Specification {
         throw new RuntimeException("Not Implemented")
     }
 
-    private void assertGraphNode(GraphNode<ParentGivenNodeInputTestImpl> graphNode,) {
+    private void assertGraphNode(GraphNode<String, ParentGivenNodeInputTestImpl> graphNode) {
 
     }
 

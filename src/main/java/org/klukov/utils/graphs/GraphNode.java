@@ -12,19 +12,27 @@ import java.util.List;
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
-public final class GraphNode<T> {
+public final class GraphNode<ID, T> {
     @EqualsAndHashCode.Include
-    private final String id;
+    private final ID id;
     private final T object;
     private final PathType startNodePathType;
-    private final List<GraphNode<T>> parentNodes = new ArrayList<>();
-    private final List<GraphNode<T>> childNodes = new ArrayList<>();
+    private final List<GraphNode<ID, T>> parentNodes = new ArrayList<>();
+    private final List<GraphNode<ID, T>> childNodes = new ArrayList<>();
 
-    public void addChild(GraphNode<T> node) {
+    void addChild(GraphNode<ID, T> node) {
         childNodes.add(node);
     }
 
-    public void addParent(GraphNode<T> node) {
+    void addParent(GraphNode<ID, T> node) {
         parentNodes.add(node);
+    }
+
+    public List<GraphNode<ID, T>> getParentNodes() {
+        return List.copyOf(parentNodes);
+    }
+
+    public List<GraphNode<ID, T>> getChildNodes() {
+        return List.copyOf(childNodes);
     }
 }

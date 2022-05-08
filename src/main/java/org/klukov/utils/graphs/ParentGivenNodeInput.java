@@ -1,11 +1,18 @@
 package org.klukov.utils.graphs;
 
+import org.klukov.utils.graphs.relation.RelatedIdsExtractor;
+
 import java.util.Collection;
 
-public interface ParentGivenNodeInput<T> {
-    String getId();
+public interface ParentGivenNodeInput<ID, T> extends RelatedIdsExtractor<ID> {
 
-    Collection<String> getParentIds();
+    ID getId();
+
+    Collection<ID> getParentIds();
 
     T getObject();
+
+    default Collection<ID> getRelatedIds() {
+        return this.getParentIds();
+    }
 }

@@ -1,51 +1,55 @@
 package org.klukov.utils.graphs;
 
+import lombok.extern.slf4j.Slf4j;
+import org.klukov.utils.graphs.relation.main.MainRelationIdsFinder;
+
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ParentGivenGraphParser<T extends ParentGivenNodeInput<T>> {
+@Slf4j
+public class ParentGivenGraphParser<ID, T extends ParentGivenNodeInput<ID, T>> {
 
-    /**
-     * Do not use parser for graphs with loops
-     *
-     * @param parserInput
-     * @param startNodeId
-     * @return
-     */
-    public GraphParserResult<T> parseGraphCollection(Collection<ParentGivenNodeInput<T>> parserInput, String startNodeId) throws GraphParserException {
+    public GraphParserResult<ID, T> parseGraphCollection(Collection<ParentGivenNodeInput<ID, T>> parserInput, ID startNodeId) throws GraphParserException {
+        log.info("Starting validation of input: {}, {}", startNodeId, parserInput);
         validateInput(parserInput, startNodeId);
+        log.info("Validation finished. Starting generating edges");
         var edges = generateEdges(parserInput);
+        log.info("Generated edges: {}", edges);
         var nodesMap = generateNodesMap(startNodeId, parserInput, edges);
+        log.info("Generated nodes: {}", nodesMap);
         edges.forEach(edge -> connectNodes(edge, nodesMap));
-        return GraphParserResult.<T>builder()
+        log.info("All edges are connected");
+        return GraphParserResult.<ID, T>builder()
                 .graphNodes(nodesMap)
                 .build();
     }
 
-    private void validateInput(Collection<ParentGivenNodeInput<T>> parserInput, String startNodeId) throws GraphParserException {
+    private void validateInput(Collection<ParentGivenNodeInput<ID, T>> parserInput, ID startNodeId) throws GraphParserException {
         if (startNodeId == null) {
             throw new GraphParserException("Start node id is null");
         }
         if (anyNodeIsNullOrHasNullId(parserInput)) {
             throw new GraphParserException("At least one wrapped node is null or has id null");
         }
-        var allNodesIds = parserInput.stream().map(ParentGivenNodeInput::getId).collect(Collectors.toSet());
+        var allNodesIds = parserInput.stream()
+                .map(ParentGivenNodeInput::getId)
+                .collect(Collectors.toSet());
         if (allNodesIds.size() != parserInput.size()) {
-            throw new GraphParserException("Node id duplicates");
+            throw new GraphParserException("Nodes have duplicates");
         }
         if (!allNodesIds.contains(startNodeId)) {
             throw new GraphParserException("Lack of start node");
         }
     }
 
-    private boolean anyNodeIsNullOrHasNullId(Collection<ParentGivenNodeInput<T>> parserInput) {
+    private boolean anyNodeIsNullOrHasNullId(Collection<ParentGivenNodeInput<ID, T>> parserInput) {
         return parserInput.stream().anyMatch(nodeWrapper -> nodeWrapper == null || nodeWrapper.getId() == null);
     }
 
-    private void connectNodes(Edge edge, Map<String, GraphNode<T>> nodesMap) {
+    private void connectNodes(Edge<ID> edge, Map<ID, GraphNode<ID, T>> nodesMap) {
         var parent = nodesMap.get(edge.getParentId());
         var child = nodesMap.get(edge.getChildId());
         if (parent != null && child != null) {
@@ -54,26 +58,64 @@ public class ParentGivenGraphParser<T extends ParentGivenNodeInput<T>> {
         }
     }
 
-    private Map<String, GraphNode<T>> generateNodesMap(String startNodeId, Collection<ParentGivenNodeInput<T>> parserInput, Set<Edge> edges) {
-        var result = new HashMap<String, GraphNode<T>>();
-        var element = convert(parserInput.stream().findFirst().get());
-        result.put(element.getId(), element);
-        return result;
+    private Map<ID, GraphNode<ID, T>> generateNodesMap(ID startNodeId, Collection<ParentGivenNodeInput<ID, T>> parserInput, Set<Edge<ID>> edges) {
+        var mainNodeIds = findAllMainNodeIds(startNodeId, parserInput);
+        log.debug("Found main node ids: {}", mainNodeIds);
+        var connectedNodeIds = findAllConnectedNodeIds(startNodeId, parserInput, edges);
+        log.debug("Found connected commits ids: {}", connectedNodeIds);
+        return parserInput.stream()
+                .map(nodeInput -> convertToResponseNode(nodeInput, mainNodeIds, connectedNodeIds))
+                .collect(Collectors.toMap(GraphNode::getId, node -> node));
     }
 
-    private GraphNode<T> convert(ParentGivenNodeInput<T> input) {
-        return GraphNode.<T>builder()
+    private GraphNode<ID, T> convertToResponseNode(ParentGivenNodeInput<ID, T> nodeInput, Set<ID> mainNodeIds, Set<ID> connectedNodeIds) {
+        var pathType = determinePathType(nodeInput.getId(), mainNodeIds, connectedNodeIds);
+        return GraphNode.<ID, T>builder()
+                .id(nodeInput.getId())
+                .object(nodeInput.getObject())
+                .startNodePathType(pathType)
+                .build();
+    }
+
+    private PathType determinePathType(ID nodeId, Set<ID> mainNodeIds, Set<ID> connectedNodeIds) {
+        if (mainNodeIds.contains(nodeId)) {
+            return PathType.MAIN;
+        } else if (connectedNodeIds.contains(nodeId)) {
+            return PathType.CONNECTED;
+        }
+        return PathType.OUTER;
+    }
+
+    private Set<ID> findAllMainNodeIds(ID startNodeId, Collection<ParentGivenNodeInput<ID, T>> parserInput) {
+        return new MainRelationIdsFinder<ID, ParentGivenNodeInput<ID, T>>()
+                .findAllConnectedIds(startNodeId, parserInput);
+    }
+
+    private Set<ID> findAllConnectedNodeIds(ID startNodeId, Collection<ParentGivenNodeInput<ID, T>> parserInput, Set<Edge<ID>> edges) {
+        return new HashSet<>();
+    }
+
+    private Map<ID, ParentGivenNodeInput<ID, T>> createNodeInputMap(Collection<ParentGivenNodeInput<ID, T>> parserInput) {
+        return parserInput.stream()
+                .collect(Collectors.toMap(
+                        ParentGivenNodeInput::getId,
+                        inputNode -> inputNode
+                ));
+    }
+
+    private GraphNode<ID, T> convert(ParentGivenNodeInput<ID, T> input) {
+        return GraphNode.<ID, T>builder()
                 .id(input.getId())
                 .object(input.getObject())
                 .startNodePathType(PathType.MAIN)
                 .build();
     }
 
-    private Set<Edge> generateEdges(Collection<ParentGivenNodeInput<T>> parserInput) {
+    private Set<Edge<ID>> generateEdges(Collection<ParentGivenNodeInput<ID, T>> parserInput) {
         return parserInput.stream()
                 .flatMap(nodeWrapper ->
                         nodeWrapper.getParentIds().stream()
-                                .map(parentId -> new Edge(parentId, nodeWrapper.getId())))
+                                .map(parentId -> new Edge<>(parentId, nodeWrapper.getId())))
                 .collect(Collectors.toSet());
     }
 }

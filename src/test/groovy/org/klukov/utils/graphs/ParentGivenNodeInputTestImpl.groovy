@@ -1,6 +1,6 @@
 package org.klukov.utils.graphs
 
-class ParentGivenNodeInputTestImpl implements ParentGivenNodeInput<ParentGivenNodeInputTestImpl> {
+class ParentGivenNodeInputTestImpl implements ParentGivenNodeInput<String, ParentGivenNodeInputTestImpl> {
 
     private String id
     private Collection<String> parentIds

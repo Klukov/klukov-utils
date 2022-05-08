@@ -3,11 +3,13 @@ package org.klukov.utils.graphs;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @EqualsAndHashCode
 @RequiredArgsConstructor
-class Edge {
-    private final String parentId;
-    private final String childId;
+@ToString
+class Edge<ID> {
+    private final ID parentId;
+    private final ID childId;
 }
