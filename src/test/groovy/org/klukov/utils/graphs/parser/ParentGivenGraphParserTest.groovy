@@ -15,7 +15,7 @@ class ParentGivenGraphParserTest extends Specification {
         def startNodeId = '001'
 
         when:
-        sub.parseGraphCollection(graphInput, startNodeId)
+        sub.parseGraphCollection(graphInput as Collection<ParentGivenNodeInput<String, ParentGivenNodeInputTestImpl>>, startNodeId)
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -94,43 +94,48 @@ class ParentGivenGraphParserTest extends Specification {
     }
 
     def "should parse simple graph"() {
+        given:
         def graphInput = generateOrderedSimpleGraph()
 
         when:
-        def startNodeId = graphInput[0].id
-        def result = sub.parseGraphCollection(graphInput, graphInput[0].id)
+        def result = sub.parseGraphCollection(graphInput, graphInput[4].id)
 
         then:
         result.graphNodes.size() == graphInput.size()
-        result.graphNodes['001'].id == '001'
-        result.graphNodes['001'].getObject() == graphInput[0]
-        result.graphNodes['001'].startNodePathType == PathType.MAIN
-        result.graphNodes['001'].parentNodes.isEmpty()
-        result.graphNodes['001'].childNodes.isEmpty()
+        result.graphNodes['005'].childNodes.isEmpty()
+        assertGraphNode(result.graphNodes['005'], graphInput[4], PathType.MAIN, 1, 0)
+        assertGraphNode(result.graphNodes['004'], graphInput[3], PathType.MAIN, 1, 1)
+        assertGraphNode(result.graphNodes['003'], graphInput[2], PathType.MAIN, 1, 1)
+        assertGraphNode(result.graphNodes['002'], graphInput[1], PathType.MAIN, 1, 1)
+        assertGraphNode(result.graphNodes['001'], graphInput[0], PathType.MAIN, 0, 1)
     }
 
     def "should parse simple graph from unordered list"() {
-        def graphInput = generateOrderedSimpleGraph()
+        def graphInput = generateUnorderedSimpleGraph()
 
         when:
-        def startNodeId = graphInput[2].id
+        def startNodeId = graphInput[3].id
         def result = sub.parseGraphCollection(graphInput, startNodeId)
 
         then:
         result.graphNodes.size() == graphInput.size()
-        result.graphNodes['001'].id == graphInput[0].id
-        result.graphNodes['001'].getObject() == graphInput[0]
-        result.graphNodes['001'].startNodePathType == PathType.MAIN
-        result.graphNodes['001'].parentNodes.isEmpty()
-        result.graphNodes['001'].childNodes.isEmpty()
+        result.graphNodes['005'].childNodes.isEmpty()
+        assertGraphNode(result.graphNodes['005'], graphInput[3], PathType.MAIN, 1, 0)
+        assertGraphNode(result.graphNodes['004'], graphInput[1], PathType.MAIN, 1, 1)
+        assertGraphNode(result.graphNodes['003'], graphInput[0], PathType.MAIN, 1, 1)
+        assertGraphNode(result.graphNodes['002'], graphInput[4], PathType.MAIN, 1, 1)
+        assertGraphNode(result.graphNodes['001'], graphInput[2], PathType.MAIN, 0, 1)
     }
 
     def "should parse complex graph"() {
+        given:
+        def graphInput = null
 
-    }
+        when:
+        sub.parseGraphCollection(graphInput, '000')
 
-    private void assertGraphNode(GraphNode<String, ParentGivenNodeInputTestImpl> graphNode) {
-
+        then:
+        noExceptionThrown()
     }
 
     List<ParentGivenNodeInputTestImpl> generateGraphWithNullNodes() {
@@ -276,4 +281,19 @@ class ParentGivenGraphParserTest extends Specification {
         ]
     }
 
+    private void assertGraphNode(
+            GraphNode<String, ParentGivenNodeInputTestImpl> result,
+            ParentGivenNodeInputTestImpl input,
+            PathType expectedPathType,
+            int expectedNumberOfParents,
+            int expectedNumberOfChildren
+    ) {
+        assert result.id == input.id
+        assert result.object == input.object
+        assert result.startNodePathType == expectedPathType
+        assert result.parentNodes.size() == expectedNumberOfParents
+        assert result.childNodes.size() == expectedNumberOfChildren
+        // validation constrain is fact that parentId could be outside graph
+        input.parentIds.containsAll(result.parentNodes.collect { it -> it.id })
+    }
 }

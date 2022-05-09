@@ -1,5 +1,8 @@
 package org.klukov.utils.graphs.parser
 
+import groovy.transform.ToString
+
+@ToString
 class ParentGivenNodeInputTestImpl implements ParentGivenNodeInput<String, ParentGivenNodeInputTestImpl> {
 
     private String id

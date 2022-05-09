@@ -19,6 +19,14 @@ import static org.klukov.utils.graphs.ProcessingErrorType.STAR_NODE_NOT_IN_GRAPH
 @Slf4j
 public class ParentGivenGraphParser<ID, T extends ParentGivenNodeInput<ID, T>> {
 
+    /**
+     * Parent ids could reference to not existing nodes
+     *
+     * @param parserInput
+     * @param startNodeId
+     * @return
+     * @throws GraphProcessingException
+     */
     public GraphParserResult<ID, T> parseGraphCollection(Collection<ParentGivenNodeInput<ID, T>> parserInput, ID startNodeId) throws GraphProcessingException {
         log.info("Starting validation of input: {}, {}", startNodeId, parserInput);
         validateInput(parserInput, startNodeId);
@@ -74,9 +82,9 @@ public class ParentGivenGraphParser<ID, T extends ParentGivenNodeInput<ID, T>> {
             Set<Edge<ID>> edges
     ) throws GraphProcessingException {
         var mainNodeIds = findAllMainNodeIds(startNodeId, parserInput);
-        log.debug("Found main node ids: {}", mainNodeIds);
+        log.info("Found main node ids: {}", mainNodeIds);
         var connectedNodeIds = findAllConnectedNodeIds(startNodeId, parserInput, edges);
-        log.debug("Found connected commits ids: {}", connectedNodeIds);
+        log.info("Found connected commits ids: {}", connectedNodeIds);
         return parserInput.stream()
                 .map(nodeInput -> convertToResponseNode(nodeInput, mainNodeIds, connectedNodeIds))
                 .collect(Collectors.toMap(GraphNode::getId, node -> node));
