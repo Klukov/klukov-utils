@@ -1,6 +1,4 @@
-package org.klukov.utils.graphs
-
-import org.klukov.utils.graphs.parser.ParentGivenNodeInput
+package org.klukov.utils.graphs.parser
 
 class ParentGivenNodeInputTestImpl implements ParentGivenNodeInput<String, ParentGivenNodeInputTestImpl> {
 

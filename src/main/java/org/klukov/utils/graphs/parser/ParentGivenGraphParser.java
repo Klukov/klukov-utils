@@ -10,6 +10,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.klukov.utils.graphs.ProcessingErrorType.DUPLICATED_NODES;
+import static org.klukov.utils.graphs.ProcessingErrorType.NULL_NODES;
+import static org.klukov.utils.graphs.ProcessingErrorType.NULL_OR_EMPTY_GRAPH;
+import static org.klukov.utils.graphs.ProcessingErrorType.NULL_START_ID;
+import static org.klukov.utils.graphs.ProcessingErrorType.STAR_NODE_NOT_IN_GRAPH;
+
 @Slf4j
 public class ParentGivenGraphParser<ID, T extends ParentGivenNodeInput<ID, T>> {
 
@@ -30,19 +36,22 @@ public class ParentGivenGraphParser<ID, T extends ParentGivenNodeInput<ID, T>> {
 
     private void validateInput(Collection<ParentGivenNodeInput<ID, T>> parserInput, ID startNodeId) throws GraphProcessingException {
         if (startNodeId == null) {
-            throw new GraphProcessingException("Start node id is null");
+            throw new GraphProcessingException(NULL_START_ID, "Start node id is null");
+        }
+        if (parserInput == null || parserInput.isEmpty()) {
+            throw new GraphProcessingException(NULL_OR_EMPTY_GRAPH, "Input collection with graph is null or empty");
         }
         if (anyNodeIsNullOrHasNullId(parserInput)) {
-            throw new GraphProcessingException("At least one wrapped node is null or has id null");
+            throw new GraphProcessingException(NULL_NODES, "At least one wrapped node is null or has id null");
         }
         var allNodesIds = parserInput.stream()
                 .map(ParentGivenNodeInput::getId)
                 .collect(Collectors.toSet());
         if (allNodesIds.size() != parserInput.size()) {
-            throw new GraphProcessingException("Nodes have duplicates");
+            throw new GraphProcessingException(DUPLICATED_NODES, "Nodes have duplicates");
         }
         if (!allNodesIds.contains(startNodeId)) {
-            throw new GraphProcessingException("Lack of start node");
+            throw new GraphProcessingException(STAR_NODE_NOT_IN_GRAPH, "Lack of start node");
         }
     }
 
@@ -59,7 +68,11 @@ public class ParentGivenGraphParser<ID, T extends ParentGivenNodeInput<ID, T>> {
         }
     }
 
-    private Map<ID, GraphNode<ID, T>> generateNodesMap(ID startNodeId, Collection<ParentGivenNodeInput<ID, T>> parserInput, Set<Edge<ID>> edges) {
+    private Map<ID, GraphNode<ID, T>> generateNodesMap(
+            ID startNodeId,
+            Collection<ParentGivenNodeInput<ID, T>> parserInput,
+            Set<Edge<ID>> edges
+    ) throws GraphProcessingException {
         var mainNodeIds = findAllMainNodeIds(startNodeId, parserInput);
         log.debug("Found main node ids: {}", mainNodeIds);
         var connectedNodeIds = findAllConnectedNodeIds(startNodeId, parserInput, edges);
@@ -87,7 +100,7 @@ public class ParentGivenGraphParser<ID, T extends ParentGivenNodeInput<ID, T>> {
         return PathType.OUTER;
     }
 
-    private Set<ID> findAllMainNodeIds(ID startNodeId, Collection<ParentGivenNodeInput<ID, T>> parserInput) {
+    private Set<ID> findAllMainNodeIds(ID startNodeId, Collection<ParentGivenNodeInput<ID, T>> parserInput) throws GraphProcessingException {
         return new DirectionalRelationIdsFinder<ID, ParentGivenNodeInput<ID, T>>()
                 .findAllConnectedIds(startNodeId, parserInput);
     }

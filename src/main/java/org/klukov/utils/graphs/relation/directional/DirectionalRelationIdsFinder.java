@@ -1,6 +1,7 @@
 package org.klukov.utils.graphs.relation.directional;
 
 import lombok.extern.slf4j.Slf4j;
+import org.klukov.utils.graphs.GraphProcessingException;
 import org.klukov.utils.graphs.relation.RelatedIdsExtractor;
 
 import java.util.Collection;
@@ -13,10 +14,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.klukov.utils.graphs.ProcessingErrorType.DUPLICATED_NODES;
+import static org.klukov.utils.graphs.ProcessingErrorType.NULL_NODES;
+import static org.klukov.utils.graphs.ProcessingErrorType.NULL_OR_EMPTY_GRAPH;
+import static org.klukov.utils.graphs.ProcessingErrorType.NULL_START_ID;
+import static org.klukov.utils.graphs.ProcessingErrorType.STAR_NODE_NOT_IN_GRAPH;
+
 @Slf4j
 public class DirectionalRelationIdsFinder<ID, T extends RelatedIdsExtractor<ID>> {
 
-    public Set<ID> findAllConnectedIds(ID startId, Collection<T> graphElements) {
+    public Set<ID> findAllConnectedIds(ID startId, Collection<T> graphElements) throws GraphProcessingException {
         validateInput(startId, graphElements);
         var graphElementsMap = getGraphElementsMap(graphElements);
         preProcessValidation(startId, graphElements, graphElementsMap);
@@ -41,29 +48,25 @@ public class DirectionalRelationIdsFinder<ID, T extends RelatedIdsExtractor<ID>>
                 .collect(Collectors.toList());
     }
 
-    private void preProcessValidation(ID startId, Collection<T> graphElements, Map<ID, T> graphElementsMap) {
+    private void preProcessValidation(ID startId, Collection<T> graphElements, Map<ID, T> graphElementsMap) throws GraphProcessingException {
         if (graphElementsMap.size() != graphElements.size()) {
-            throw new RuntimeException("TO DO");
+            throw new GraphProcessingException(DUPLICATED_NODES, "Nodes have duplicates");
         }
         if (!graphElementsMap.containsKey(startId)) {
-            throw new RuntimeException("TO DO");
+            throw new GraphProcessingException(STAR_NODE_NOT_IN_GRAPH, "Lack of start node");
         }
     }
 
-    private void validateInput(ID startId, Collection<T> graphElements) {
-        if (startId == null || graphElements == null || graphElements.size() == 0) {
-            throw new RuntimeException("TO DO");
+    private void validateInput(ID startId, Collection<T> graphElements) throws GraphProcessingException {
+        if (startId == null) {
+            throw new GraphProcessingException(NULL_START_ID, "Start node id is null");
+        }
+        if (graphElements == null || graphElements.size() == 0) {
+            throw new GraphProcessingException(NULL_OR_EMPTY_GRAPH, "Input collection with graph is null or empty");
         }
         if (anyNullObjectOrNullId(graphElements)) {
-            throw new RuntimeException("TO DO");
+            throw new GraphProcessingException(NULL_NODES, "At least one wrapped node is null or has id null");
         }
-        if (graphElementsDoesNotContainStartElement(startId, graphElements)) {
-            throw new RuntimeException("TODO");
-        }
-    }
-
-    private boolean graphElementsDoesNotContainStartElement(ID startId, Collection<T> graphElements) {
-        return graphElements.stream().noneMatch(element -> element.getId().equals(startId));
     }
 
     private boolean anyNullObjectOrNullId(Collection<T> graphElements) {
