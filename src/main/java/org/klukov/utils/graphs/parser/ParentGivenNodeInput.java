@@ -1,4 +1,4 @@
-package org.klukov.utils.graphs;
+package org.klukov.utils.graphs.parser;
 
 import org.klukov.utils.graphs.relation.RelatedIdsExtractor;
 

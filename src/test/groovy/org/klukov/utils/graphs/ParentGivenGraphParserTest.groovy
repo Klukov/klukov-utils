@@ -1,5 +1,8 @@
 package org.klukov.utils.graphs
 
+import org.klukov.utils.graphs.parser.GraphNode
+import org.klukov.utils.graphs.parser.ParentGivenGraphParser
+import org.klukov.utils.graphs.parser.PathType
 import spock.lang.Specification
 import spock.lang.Subject
 

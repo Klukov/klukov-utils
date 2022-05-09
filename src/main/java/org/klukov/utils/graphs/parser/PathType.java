@@ -1,4 +1,4 @@
-package org.klukov.utils.graphs;
+package org.klukov.utils.graphs.parser;
 
 public enum PathType {
     MAIN,

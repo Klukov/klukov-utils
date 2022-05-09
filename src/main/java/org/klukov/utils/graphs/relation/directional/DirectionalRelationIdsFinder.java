@@ -1,4 +1,4 @@
-package org.klukov.utils.graphs.relation.main;
+package org.klukov.utils.graphs.relation.directional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.klukov.utils.graphs.relation.RelatedIdsExtractor;
@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class MainRelationIdsFinder<ID, T extends RelatedIdsExtractor<ID>> {
+public class DirectionalRelationIdsFinder<ID, T extends RelatedIdsExtractor<ID>> {
 
     public Set<ID> findAllConnectedIds(ID startId, Collection<T> graphElements) {
         validateInput(startId, graphElements);
@@ -57,6 +57,13 @@ public class MainRelationIdsFinder<ID, T extends RelatedIdsExtractor<ID>> {
         if (anyNullObjectOrNullId(graphElements)) {
             throw new RuntimeException("TO DO");
         }
+        if (graphElementsDoesNotContainStartElement(startId, graphElements)) {
+            throw new RuntimeException("TODO");
+        }
+    }
+
+    private boolean graphElementsDoesNotContainStartElement(ID startId, Collection<T> graphElements) {
+        return graphElements.stream().noneMatch(element -> element.getId().equals(startId));
     }
 
     private boolean anyNullObjectOrNullId(Collection<T> graphElements) {
