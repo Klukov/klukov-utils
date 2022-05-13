@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DirectionalRelationIdsFinder<ID, T extends GraphNodeInput<ID>> {
 
+    private final GraphValidator<ID, T> graphValidator = new GraphValidator<>();
+
     public Set<ID> findAllConnectedIds(DirectionalRelationIdsFinderInput<ID, T> input) throws GraphProcessingException {
         validateInput(input);
         var graphElementsMap = getGraphElementsMap(input.getGraphInput());
@@ -43,7 +45,7 @@ public class DirectionalRelationIdsFinder<ID, T extends GraphNodeInput<ID>> {
     }
 
     private void validateInput(DirectionalRelationIdsFinderInput<ID, T> input) throws GraphProcessingException {
-        new GraphValidator<ID, T>().validate(input);
+        graphValidator.validate(input);
     }
 
     private Map<ID, T> getGraphElementsMap(Collection<T> graphElements) {
