@@ -8,14 +8,14 @@ import spock.lang.Subject
 class ParentGivenGraphParserTest extends Specification {
 
     @Subject
-    ParentGivenGraphParser<String, ParentGivenNodeInputTestImpl> sub = new ParentGivenGraphParser<>()
+    ParentGivenGraphParser<String, ParentGivenGraphNodeInputTestImplInput> sub = new ParentGivenGraphParser<>()
 
     def "should throw exception if graph is null or empty"() {
         given:
-        def startNodeId = '001'
+        def startNodeId = 'START'
 
         when:
-        sub.parseGraphCollection(graphInput as Collection<ParentGivenNodeInput<String, ParentGivenNodeInputTestImpl>>, startNodeId)
+        sub.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -29,7 +29,7 @@ class ParentGivenGraphParserTest extends Specification {
 
     def "should throw exception if start element is null"() {
         when:
-        sub.parseGraphCollection(generateOrderedSimpleGraph(), null)
+        sub.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), null))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -41,7 +41,7 @@ class ParentGivenGraphParserTest extends Specification {
         def startNodeId = 'notMatchedId'
 
         when:
-        sub.parseGraphCollection(generateOrderedSimpleGraph(), startNodeId)
+        sub.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -50,10 +50,10 @@ class ParentGivenGraphParserTest extends Specification {
 
     def "should throw exception if any node is null or has id with null value"() {
         given:
-        def startNodeId = '001'
+        def startNodeId = 'START'
 
         when:
-        sub.parseGraphCollection(graphInput, startNodeId)
+        sub.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -67,10 +67,10 @@ class ParentGivenGraphParserTest extends Specification {
 
     def "should throw exception if graph contains ids duplicates"() {
         given:
-        def startNodeId = '001'
+        def startNodeId = 'START'
 
         when:
-        sub.parseGraphCollection(generateGraphWithDuplicates(), startNodeId)
+        sub.parseGraphCollection(new ParentGivenGraphParseInput(generateGraphWithDuplicates(), startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -82,15 +82,13 @@ class ParentGivenGraphParserTest extends Specification {
         def graphInput = generateSingleElementGraph()
 
         when:
-        def result = sub.parseGraphCollection(graphInput, graphInput[0].id)
+        def result = sub.parseGraphCollection(
+                new ParentGivenGraphParseInput(graphInput, graphInput[0].id))
 
         then:
-        result.graphNodes.size() == graphInput.size()
-        result.graphNodes['001'].id == '001'
-        result.graphNodes['001'].getObject() == graphInput[0]
-        result.graphNodes['001'].startNodePathType == PathType.MAIN
-        result.graphNodes['001'].parentNodes.isEmpty()
-        result.graphNodes['001'].childNodes.isEmpty()
+        def nodesMap = result.graphNodes
+        nodesMap.size() == graphInput.size()
+        assertGraphNode(nodesMap['START'], graphInput[0], PathType.MAIN, [], [])
     }
 
     def "should parse simple graph"() {
@@ -98,202 +96,194 @@ class ParentGivenGraphParserTest extends Specification {
         def graphInput = generateOrderedSimpleGraph()
 
         when:
-        def result = sub.parseGraphCollection(graphInput, graphInput[4].id)
+        def result = sub.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, graphInput[4].id))
 
         then:
-        result.graphNodes.size() == graphInput.size()
-        result.graphNodes['005'].childNodes.isEmpty()
-        assertGraphNode(result.graphNodes['005'], graphInput[4], PathType.MAIN, 1, 0)
-        assertGraphNode(result.graphNodes['004'], graphInput[3], PathType.MAIN, 1, 1)
-        assertGraphNode(result.graphNodes['003'], graphInput[2], PathType.MAIN, 1, 1)
-        assertGraphNode(result.graphNodes['002'], graphInput[1], PathType.MAIN, 1, 1)
-        assertGraphNode(result.graphNodes['001'], graphInput[0], PathType.MAIN, 0, 1)
+        def nodesMap = result.graphNodes
+        nodesMap.size() == graphInput.size()
+        nodesMap['START'].childNodes.isEmpty()
+        assertGraphNode(nodesMap['START'], graphInput[4], PathType.MAIN, [nodesMap['004']], [])
+        assertGraphNode(nodesMap['004'], graphInput[3], PathType.MAIN, [nodesMap['003']], [nodesMap['START']])
+        assertGraphNode(nodesMap['003'], graphInput[2], PathType.MAIN, [nodesMap['002']], [nodesMap['004']])
+        assertGraphNode(nodesMap['002'], graphInput[1], PathType.MAIN, [nodesMap['001']], [nodesMap['003']])
+        assertGraphNode(nodesMap['001'], graphInput[0], PathType.MAIN, [], [nodesMap['002']])
     }
 
     def "should parse simple graph from unordered list"() {
+        given:
         def graphInput = generateUnorderedSimpleGraph()
 
         when:
         def startNodeId = graphInput[3].id
-        def result = sub.parseGraphCollection(graphInput, startNodeId)
+        def result = sub.parseGraphCollection(
+                new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
-        result.graphNodes.size() == graphInput.size()
-        result.graphNodes['005'].childNodes.isEmpty()
-        assertGraphNode(result.graphNodes['005'], graphInput[3], PathType.MAIN, 1, 0)
-        assertGraphNode(result.graphNodes['004'], graphInput[1], PathType.MAIN, 1, 1)
-        assertGraphNode(result.graphNodes['003'], graphInput[0], PathType.MAIN, 1, 1)
-        assertGraphNode(result.graphNodes['002'], graphInput[4], PathType.MAIN, 1, 1)
-        assertGraphNode(result.graphNodes['001'], graphInput[2], PathType.MAIN, 0, 1)
+        def nodesMap = result.graphNodes
+        nodesMap.size() == graphInput.size()
+        nodesMap['START'].childNodes.isEmpty()
+        assertGraphNode(nodesMap['START'], graphInput[3], PathType.MAIN, [nodesMap['004']], [])
+        assertGraphNode(nodesMap['004'], graphInput[1], PathType.MAIN, [nodesMap['003']], [nodesMap['START']])
+        assertGraphNode(nodesMap['003'], graphInput[0], PathType.MAIN, [nodesMap['002']], [nodesMap['004']])
+        assertGraphNode(nodesMap['002'], graphInput[4], PathType.MAIN, [nodesMap['001']], [nodesMap['003']])
+        assertGraphNode(nodesMap['001'], graphInput[2], PathType.MAIN, [], [nodesMap['002']])
     }
 
-    def "should parse complex graph"() {
+    def "should parse complex graph without cycles"() {
         given:
-        def graphInput = null
+        def graphInput = generateComplexGraphWithoutCycles()
 
         when:
-        sub.parseGraphCollection(graphInput, '000')
+        def result = sub.parseGraphCollection(
+                new ParentGivenGraphParseInput(graphInput, 'START'))
+
+        then:
+        def nodesMap = result.graphNodes
+        nodesMap.size() == graphInput.size()
+        assertGraphNode(nodesMap['M01'], graphInput[0], PathType.MAIN, [], [nodesMap['M02']])
+        assertGraphNode(nodesMap['M02'], graphInput[1], PathType.MAIN, [nodesMap['M01']], [nodesMap['M03']])
+        assertGraphNode(nodesMap['M03'], graphInput[2], PathType.MAIN, [nodesMap['M02']], [nodesMap['M04'], nodesMap['C030'], nodesMap['C031']])
+        assertGraphNode(nodesMap['C030'], graphInput[3], PathType.CONNECTED, [nodesMap['M03']], [])
+        assertGraphNode(nodesMap['C031'], graphInput[4], PathType.CONNECTED, [nodesMap['M03']], [nodesMap['C032']])
+        assertGraphNode(nodesMap['C032'], graphInput[5], PathType.CONNECTED, [nodesMap['C031']], [])
+        assertGraphNode(nodesMap['M04'], graphInput[6], PathType.MAIN, [nodesMap['M03']], [nodesMap['M05']])
+        assertGraphNode(nodesMap['M05'], graphInput[7], PathType.MAIN, [nodesMap['M04']], [nodesMap['M06'], nodesMap['M08']])
+        assertGraphNode(nodesMap['M06'], graphInput[8], PathType.MAIN, [nodesMap['M05'], nodesMap['M07']], [nodesMap['M10']])
+        assertGraphNode(nodesMap['M07'], graphInput[9], PathType.MAIN, [], [nodesMap['M06'], nodesMap['C070']])
+        assertGraphNode(nodesMap['C070'], graphInput[10], PathType.CONNECTED, [nodesMap['M07']], [])
+        assertGraphNode(nodesMap['M08'], graphInput[11], PathType.MAIN, [nodesMap['M05']], [nodesMap['M09']])
+        assertGraphNode(nodesMap['M09'], graphInput[12], PathType.MAIN, [nodesMap['M08']], [nodesMap['C090'], nodesMap['M10']])
+        assertGraphNode(nodesMap['C090'], graphInput[13], PathType.CONNECTED, [nodesMap['M09']], [])
+        assertGraphNode(nodesMap['M10'], graphInput[14], PathType.MAIN, [nodesMap['M06'], nodesMap['M09']], [nodesMap['START'], nodesMap['C100']])
+        assertGraphNode(nodesMap['START'], graphInput[15], PathType.MAIN, [nodesMap['M10']], [nodesMap['AS00'], nodesMap['AS01']])
+        assertGraphNode(nodesMap['C100'], graphInput[16], PathType.CONNECTED, [nodesMap['M10']], [nodesMap['C101'], nodesMap['C102']])
+        assertGraphNode(nodesMap['C101'], graphInput[17], PathType.CONNECTED, [nodesMap['C100']], [nodesMap['C102']])
+        assertGraphNode(nodesMap['C102'], graphInput[18], PathType.CONNECTED, [nodesMap['C100'], nodesMap['C101']], [])
+        assertGraphNode(nodesMap['AS00'], graphInput[19], PathType.CONNECTED, [], [])
+        assertGraphNode(nodesMap['AS01'], graphInput[20], PathType.CONNECTED, [], [])
+        assertGraphNode(nodesMap['AS02'], graphInput[21], PathType.CONNECTED, [], [])
+        assertGraphNode(nodesMap['OUTER00'], graphInput[22], PathType.OUTER, [], [nodesMap['OUTER01']])
+        assertGraphNode(nodesMap['OUTER01'], graphInput[23], PathType.OUTER, [nodesMap['OUTER00']], [nodesMap['OUTER02']])
+        assertGraphNode(nodesMap['OUTER02'], graphInput[24], PathType.OUTER, [nodesMap['OUTER01']], [])
+    }
+
+    def "should parse complex graph with cycles"() {
+        given:
+        def graphInput = generateComplexGraphWithCycles()
+
+        when:
+        sub.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
 
         then:
         noExceptionThrown()
     }
 
-    List<ParentGivenNodeInputTestImpl> generateGraphWithNullNodes() {
-        [
-                new ParentGivenNodeInputTestImpl(
-                        id: "001",
-                        parentIds: ["UNKNOWN"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "002",
-                        parentIds: ["001"],
-                ),
-                null,
-                new ParentGivenNodeInputTestImpl(
-                        id: "003",
-                        parentIds: ["002"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "004",
-                        parentIds: ["003"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "005",
-                        parentIds: ["004"],
-                ),
-        ]
-    }
-
-    List<ParentGivenNodeInputTestImpl> generateGraphWithNullNodeIds() {
-        [
-                new ParentGivenNodeInputTestImpl(
-                        id: "001",
-                        parentIds: ["UNKNOWN"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "002",
-                        parentIds: ["001"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "003",
-                        parentIds: ["002"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "004",
-                        parentIds: ["003"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "005",
-                        parentIds: ["004"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: null,
-                        parentIds: ["005"],
-                ),
-        ]
-    }
-
-    List<ParentGivenNodeInputTestImpl> generateGraphWithDuplicates() {
-        [
-                new ParentGivenNodeInputTestImpl(
-                        id: "001",
-                        parentIds: ["UNKNOWN"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "002",
-                        parentIds: ["001"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "003",
-                        parentIds: ["002"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "004",
-                        parentIds: ["003"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "005",
-                        parentIds: ["004"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "003",
-                        parentIds: ["002", "003"],
-                ),
-        ]
-    }
-
-    List<ParentGivenNodeInputTestImpl> generateSingleElementGraph() {
-        [
-                new ParentGivenNodeInputTestImpl(
-                        id: "001",
-                        parentIds: [],
-                )
-        ]
-    }
-
-    List<ParentGivenNodeInputTestImpl> generateOrderedSimpleGraph() {
-        [
-                new ParentGivenNodeInputTestImpl(
-                        id: "001",
-                        parentIds: ["UNKNOWN"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "002",
-                        parentIds: ["001"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "003",
-                        parentIds: ["002"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "004",
-                        parentIds: ["003"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "005",
-                        parentIds: ["004"],
-                ),
-        ]
-    }
-
-    List<ParentGivenNodeInputTestImpl> generateUnorderedSimpleGraph() {
-        [
-                new ParentGivenNodeInputTestImpl(
-                        id: "003",
-                        parentIds: ["002"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "004",
-                        parentIds: ["003"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "001",
-                        parentIds: ["UNKNOWN"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "005",
-                        parentIds: ["004"],
-                ),
-                new ParentGivenNodeInputTestImpl(
-                        id: "002",
-                        parentIds: ["001"],
-                ),
-        ]
-    }
-
-    private void assertGraphNode(
-            GraphNode<String, ParentGivenNodeInputTestImpl> result,
-            ParentGivenNodeInputTestImpl input,
+    private static void assertGraphNode(
+            GraphNode<String, ParentGivenGraphNodeInputTestImplInput> result,
+            ParentGivenGraphNodeInputTestImplInput input,
             PathType expectedPathType,
-            int expectedNumberOfParents,
-            int expectedNumberOfChildren
+            List<GraphNode<String, ParentGivenGraphNodeInputTestImplInput>> expectedParents,
+            List<GraphNode<String, ParentGivenGraphNodeInputTestImplInput>> expectedChildren
     ) {
         assert result.id == input.id
         assert result.object == input.object
         assert result.startNodePathType == expectedPathType
-        assert result.parentNodes.size() == expectedNumberOfParents
-        assert result.childNodes.size() == expectedNumberOfChildren
+        assert result.parentNodes.toSet() == expectedParents.toSet()
+        assert result.childNodes.toSet() == expectedChildren.toSet()
         // validation constrain is fact that parentId could be outside graph
-        input.parentIds.containsAll(result.parentNodes.collect { it -> it.id })
+        assert input.parentIds.containsAll(result.parentNodes.collect { it -> it.id })
+    }
+
+    List<ParentGivenGraphNodeInputTestImplInput> generateGraphWithNullNodes() {
+        [
+                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
+                null,
+                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
+        ]
+    }
+
+    List<ParentGivenGraphNodeInputTestImplInput> generateGraphWithNullNodeIds() {
+        [
+                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: null, parentIds: ["004"]),
+        ]
+    }
+
+    List<ParentGivenGraphNodeInputTestImplInput> generateGraphWithDuplicates() {
+        [
+                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002", "003"]),
+        ]
+    }
+
+    List<ParentGivenGraphNodeInputTestImplInput> generateSingleElementGraph() {
+        [
+                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: [],)
+        ]
+    }
+
+    List<ParentGivenGraphNodeInputTestImplInput> generateOrderedSimpleGraph() {
+        [
+                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
+        ]
+    }
+
+    List<ParentGivenGraphNodeInputTestImplInput> generateUnorderedSimpleGraph() {
+        [
+                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
+        ]
+    }
+
+    List<ParentGivenGraphNodeInputTestImplInput> generateComplexGraphWithoutCycles() {
+        [
+                new ParentGivenGraphNodeInputTestImplInput(id: "M01", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "M02", parentIds: ["M01"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "M03", parentIds: ["M02"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "C030", parentIds: ["M03"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "C031", parentIds: ["M03"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "C032", parentIds: ["C031"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "M04", parentIds: ["M03"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "M05", parentIds: ["M04"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "M06", parentIds: ["M05", "M07"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "M07", parentIds: []),
+                new ParentGivenGraphNodeInputTestImplInput(id: "C070", parentIds: ["M07"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "M08", parentIds: ["M05"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "M09", parentIds: ["M08"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "C090", parentIds: ["M09"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "M10", parentIds: ["M06", "M09"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["M10"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "C100", parentIds: ["M10"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "C101", parentIds: ["C100"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "C102", parentIds: ["C100", "C101"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "AS00", parentIds: ["START"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "AS01", parentIds: ["START"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "AS02", parentIds: ["AS01"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER01", parentIds: ["OUTER-UNKNOWN"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER02", parentIds: ["OUTER01"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER03", parentIds: ["OUTER02"]),
+        ]
+    }
+
+    List<ParentGivenGraphNodeInputTestImplInput> generateComplexGraphWithCycles() {
+        throw new RuntimeException("NOT IMPLEMENTED")
     }
 }

@@ -1,11 +1,11 @@
 package org.klukov.utils.graphs.relation.directional
 
-import org.klukov.utils.graphs.relation.RelatedIdsExtractor
+import org.klukov.utils.graphs.relation.GraphNodeInput
 
-class RelatedIdsExtractorTestImpl implements RelatedIdsExtractor<String> {
+class GraphNodeInputTestImpl implements GraphNodeInput<String> {
 
     private String id
-    private List<String> parentIds
+    private List<String> relatedIds
 
     @Override
     String getId() {
@@ -14,6 +14,6 @@ class RelatedIdsExtractorTestImpl implements RelatedIdsExtractor<String> {
 
     @Override
     Collection<String> getRelatedIds() {
-        return parentIds
+        return relatedIds
     }
 }

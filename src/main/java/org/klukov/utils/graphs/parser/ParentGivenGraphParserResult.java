@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Builder
 @RequiredArgsConstructor
-public final class GraphParserResult<ID, T> {
+public final class ParentGivenGraphParserResult<ID, T> {
     private final Map<ID, GraphNode<ID, T>> graphNodes;
 
     public Map<ID, GraphNode<ID, T>> getGraphNodes() {
