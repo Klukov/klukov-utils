@@ -1,13 +1,13 @@
 package org.klukov.utils.graphs.parser;
 
 import lombok.extern.slf4j.Slf4j;
+import org.klukov.utils.graphs.GraphEdge;
 import org.klukov.utils.graphs.GraphProcessingException;
 import org.klukov.utils.graphs.relation.bidirectional.BidirectionalRelationIdsFinder;
 import org.klukov.utils.graphs.relation.directional.DirectionalRelationIdsFinder;
 import org.klukov.utils.graphs.validation.GraphValidator;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class ParentGivenGraphParser<ID, T extends ParentGivenGraphNodeInputInput<ID, T>> {
 
     private final DirectionalRelationIdsFinder<ID, T> directionalRelationIdsFinder = new DirectionalRelationIdsFinder<>();
-    private final BidirectionalRelationIdsFinder<ID, T> bidirectionalRelationIdsFinder = new BidirectionalRelationIdsFinder<>();
+    private final BidirectionalRelationIdsFinder<ID> bidirectionalRelationIdsFinder = new BidirectionalRelationIdsFinder<>();
     private final GraphValidator<ID, T> graphValidator = new GraphValidator<>();
 
     /**
@@ -43,9 +43,9 @@ public class ParentGivenGraphParser<ID, T extends ParentGivenGraphNodeInputInput
         graphValidator.validate(parentGivenGraphParseInput);
     }
 
-    private void connectNodes(GraphParserEdge<ID> graphParserEdge, Map<ID, GraphNode<ID, T>> nodesMap) {
-        var parent = nodesMap.get(graphParserEdge.getParentId());
-        var child = nodesMap.get(graphParserEdge.getChildId());
+    private void connectNodes(GraphEdge<ID> graphEdge, Map<ID, GraphNode<ID, T>> nodesMap) {
+        var parent = nodesMap.get(graphEdge.getParentId());
+        var child = nodesMap.get(graphEdge.getChildId());
         if (parent != null && child != null) {
             parent.addChild(child);
             child.addParent(parent);
@@ -60,7 +60,6 @@ public class ParentGivenGraphParser<ID, T extends ParentGivenGraphNodeInputInput
         log.info("Found main node ids: {}", mainNodeIds);
         var connectedNodeIds = findAllConnectedNodeIds(
                 parentGivenGraphParseInput.getStartNodeId(),
-                parentGivenGraphParseInput.getGraphInput(),
                 graphParserEdges);
         log.info("Found connected commits ids: {}", connectedNodeIds);
         return parentGivenGraphParseInput.getGraphInput().stream()
@@ -90,8 +89,8 @@ public class ParentGivenGraphParser<ID, T extends ParentGivenGraphNodeInputInput
         return directionalRelationIdsFinder.findAllConnectedIds(parentGivenGraphParseInput);
     }
 
-    private Set<ID> findAllConnectedNodeIds(ID startNodeId, Collection<T> parserInput, Set<GraphParserEdge<ID>> graphParserEdges) {
-        return new HashSet<>();
+    private Set<ID> findAllConnectedNodeIds(ID startNodeId, Set<GraphParserEdge<ID>> graphParserEdges) {
+        return bidirectionalRelationIdsFinder.findAllConnectedIds(startNodeId, graphParserEdges);
     }
 
     private Set<GraphParserEdge<ID>> generateEdges(Collection<T> parserInput) {

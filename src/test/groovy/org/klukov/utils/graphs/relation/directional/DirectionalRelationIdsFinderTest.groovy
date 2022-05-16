@@ -13,7 +13,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
     def "should throw exception if start id is null"() {
         when:
         sub.findAllConnectedIds(
-                new DirectionalRelationIdsFinderInputTestImpl(
+                new RelationIdsFinderInputTestImpl(
                         startNodeId: null,
                         graphInput: generateOrderedSimpleGraph(),
                 ))
@@ -26,7 +26,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
     def "should throw exception if graph elements collection is null or empty"() {
         when:
         sub.findAllConnectedIds(
-                new DirectionalRelationIdsFinderInputTestImpl(
+                new RelationIdsFinderInputTestImpl(
                         startNodeId: 'START',
                         graphInput: graphInput as Collection<GraphNodeInputTestImpl>,
                 ))
@@ -44,7 +44,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
     def "should throw exception if graph contains null nodes or null node ids"() {
         when:
         sub.findAllConnectedIds(
-                new DirectionalRelationIdsFinderInputTestImpl(
+                new RelationIdsFinderInputTestImpl(
                         startNodeId: 'START',
                         graphInput: graphInput,
                 ))
@@ -62,7 +62,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
     def "should throw exception if graph elements do not contain start id"() {
         when:
         sub.findAllConnectedIds(
-                new DirectionalRelationIdsFinderInputTestImpl(
+                new RelationIdsFinderInputTestImpl(
                         startNodeId: 'notMatchedId',
                         graphInput: generateOrderedSimpleGraph(),
                 ))
@@ -75,7 +75,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
     def "should throw exception if graph contains id duplicates"() {
         when:
         sub.findAllConnectedIds(
-                new DirectionalRelationIdsFinderInputTestImpl(
+                new RelationIdsFinderInputTestImpl(
                         startNodeId: 'START',
                         graphInput: generateGraphWithDuplicates(),
                 ))
@@ -88,7 +88,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
     def "should properly process list like graph"() {
         when:
         def result = sub.findAllConnectedIds(
-                new DirectionalRelationIdsFinderInputTestImpl(
+                new RelationIdsFinderInputTestImpl(
                         startNodeId: 'START',
                         graphInput: givenGraph,
                 ))

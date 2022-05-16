@@ -159,9 +159,9 @@ class ParentGivenGraphParserTest extends Specification {
         assertGraphNode(nodesMap['C100'], graphInput[16], PathType.CONNECTED, [nodesMap['M10']], [nodesMap['C101'], nodesMap['C102']])
         assertGraphNode(nodesMap['C101'], graphInput[17], PathType.CONNECTED, [nodesMap['C100']], [nodesMap['C102']])
         assertGraphNode(nodesMap['C102'], graphInput[18], PathType.CONNECTED, [nodesMap['C100'], nodesMap['C101']], [])
-        assertGraphNode(nodesMap['AS00'], graphInput[19], PathType.CONNECTED, [], [])
-        assertGraphNode(nodesMap['AS01'], graphInput[20], PathType.CONNECTED, [], [])
-        assertGraphNode(nodesMap['AS02'], graphInput[21], PathType.CONNECTED, [], [])
+        assertGraphNode(nodesMap['AS00'], graphInput[19], PathType.CONNECTED, [nodesMap['START']], [])
+        assertGraphNode(nodesMap['AS01'], graphInput[20], PathType.CONNECTED, [nodesMap['START']], [nodesMap['AS02']])
+        assertGraphNode(nodesMap['AS02'], graphInput[21], PathType.CONNECTED, [nodesMap['AS01']], [])
         assertGraphNode(nodesMap['OUTER00'], graphInput[22], PathType.OUTER, [], [nodesMap['OUTER01']])
         assertGraphNode(nodesMap['OUTER01'], graphInput[23], PathType.OUTER, [nodesMap['OUTER00']], [nodesMap['OUTER02']])
         assertGraphNode(nodesMap['OUTER02'], graphInput[24], PathType.OUTER, [nodesMap['OUTER01']], [])
@@ -277,9 +277,9 @@ class ParentGivenGraphParserTest extends Specification {
                 new ParentGivenGraphNodeInputTestImplInput(id: "AS00", parentIds: ["START"]),
                 new ParentGivenGraphNodeInputTestImplInput(id: "AS01", parentIds: ["START"]),
                 new ParentGivenGraphNodeInputTestImplInput(id: "AS02", parentIds: ["AS01"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER01", parentIds: ["OUTER-UNKNOWN"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER00", parentIds: ["OUTER-UNKNOWN"]),
+                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER01", parentIds: ["OUTER00"]),
                 new ParentGivenGraphNodeInputTestImplInput(id: "OUTER02", parentIds: ["OUTER01"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER03", parentIds: ["OUTER02"]),
         ]
     }
 

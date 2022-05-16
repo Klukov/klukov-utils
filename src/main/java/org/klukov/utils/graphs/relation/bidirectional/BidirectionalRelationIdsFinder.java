@@ -1,15 +1,14 @@
 package org.klukov.utils.graphs.relation.bidirectional;
 
-import org.klukov.utils.graphs.GraphProcessingException;
-import org.klukov.utils.graphs.relation.GraphNodeInput;
+import org.klukov.utils.graphs.GraphEdge;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
-public class BidirectionalRelationIdsFinder<ID, T extends GraphNodeInput<ID>> {
+public class BidirectionalRelationIdsFinder<ID> {
 
-    public Set<ID> findAllConnectedIds(ID startId, Collection<T> graphElements) throws GraphProcessingException {
-        return new HashSet<>();
+    public <E extends GraphEdge<ID>> Set<ID> findAllConnectedIds(ID startId, Collection<E> graphEdges) {
+        var solver = new BidirectionalRelationSolver<ID>(graphEdges);
+        return solver.getRelatedIds(startId);
     }
 }

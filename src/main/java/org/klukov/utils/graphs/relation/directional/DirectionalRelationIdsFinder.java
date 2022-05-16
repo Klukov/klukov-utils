@@ -3,6 +3,7 @@ package org.klukov.utils.graphs.relation.directional;
 import lombok.extern.slf4j.Slf4j;
 import org.klukov.utils.graphs.GraphProcessingException;
 import org.klukov.utils.graphs.relation.GraphNodeInput;
+import org.klukov.utils.graphs.relation.RelationIdsFinderInput;
 import org.klukov.utils.graphs.validation.GraphValidator;
 
 import java.util.Collection;
@@ -20,7 +21,7 @@ public class DirectionalRelationIdsFinder<ID, T extends GraphNodeInput<ID>> {
 
     private final GraphValidator<ID, T> graphValidator = new GraphValidator<>();
 
-    public Set<ID> findAllConnectedIds(DirectionalRelationIdsFinderInput<ID, T> input) throws GraphProcessingException {
+    public Set<ID> findAllConnectedIds(RelationIdsFinderInput<ID, T> input) throws GraphProcessingException {
         validateInput(input);
         var graphElementsMap = getGraphElementsMap(input.getGraphInput());
         var result = new HashSet<ID>();
@@ -44,7 +45,7 @@ public class DirectionalRelationIdsFinder<ID, T extends GraphNodeInput<ID>> {
                 .collect(Collectors.toList());
     }
 
-    private void validateInput(DirectionalRelationIdsFinderInput<ID, T> input) throws GraphProcessingException {
+    private void validateInput(RelationIdsFinderInput<ID, T> input) throws GraphProcessingException {
         graphValidator.validate(input);
     }
 
