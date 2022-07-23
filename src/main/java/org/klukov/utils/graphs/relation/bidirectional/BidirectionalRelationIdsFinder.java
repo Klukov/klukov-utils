@@ -8,7 +8,7 @@ import java.util.Set;
 public class BidirectionalRelationIdsFinder<ID> {
 
     public <E extends GraphEdge<ID>> Set<ID> findAllConnectedIds(ID startId, Collection<E> graphEdges) {
-        var solver = new BidirectionalRelationSolver<ID>(graphEdges);
+        var solver = new BidirectionalRelationSolver<>(graphEdges);
         return solver.getRelatedIds(startId);
     }
 }

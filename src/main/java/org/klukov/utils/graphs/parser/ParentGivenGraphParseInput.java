@@ -11,7 +11,7 @@ import java.util.Collection;
 @Getter
 @Builder
 @ToString
-public final class ParentGivenGraphParseInput<ID, T extends ParentGivenGraphNodeInputInput<ID, T>> implements RelationIdsFinderInput<ID, T>, ValidatableGraphInput<ID, T> {
+public final class ParentGivenGraphParseInput<ID, T extends ParentGivenGraphNodeInput<ID, T>> implements RelationIdsFinderInput<ID, T>, ValidatableGraphInput<ID, T> {
     private final Collection<T> graphInput;
     private final ID startNodeId;
 

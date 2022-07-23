@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ParentGivenGraphParser<ID, T extends ParentGivenGraphNodeInputInput<ID, T>> {
+public class ParentGivenGraphParser<ID, T extends ParentGivenGraphNodeInput<ID, T>> {
 
     private final DirectionalRelationIdsFinder<ID, T> directionalRelationIdsFinder = new DirectionalRelationIdsFinder<>();
     private final BidirectionalRelationIdsFinder<ID> bidirectionalRelationIdsFinder = new BidirectionalRelationIdsFinder<>();
@@ -67,7 +67,7 @@ public class ParentGivenGraphParser<ID, T extends ParentGivenGraphNodeInputInput
                 .collect(Collectors.toMap(GraphNode::getId, node -> node));
     }
 
-    private GraphNode<ID, T> convertToResponseNode(ParentGivenGraphNodeInputInput<ID, T> nodeInput, Set<ID> mainNodeIds, Set<ID> connectedNodeIds) {
+    private GraphNode<ID, T> convertToResponseNode(ParentGivenGraphNodeInput<ID, T> nodeInput, Set<ID> mainNodeIds, Set<ID> connectedNodeIds) {
         var pathType = determinePathType(nodeInput.getId(), mainNodeIds, connectedNodeIds);
         return GraphNode.<ID, T>builder()
                 .id(nodeInput.getId())

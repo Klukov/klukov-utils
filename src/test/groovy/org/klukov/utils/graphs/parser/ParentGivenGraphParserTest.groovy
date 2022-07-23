@@ -8,7 +8,7 @@ import spock.lang.Subject
 class ParentGivenGraphParserTest extends Specification {
 
     @Subject
-    ParentGivenGraphParser<String, ParentGivenGraphNodeInputTestImplInput> sub = new ParentGivenGraphParser<>()
+    ParentGivenGraphParser<String, ParentGivenGraphNodeTestImplInput> sub = new ParentGivenGraphParser<>()
 
     def "should throw exception if graph is null or empty"() {
         given:
@@ -179,11 +179,11 @@ class ParentGivenGraphParserTest extends Specification {
     }
 
     private static void assertGraphNode(
-            GraphNode<String, ParentGivenGraphNodeInputTestImplInput> result,
-            ParentGivenGraphNodeInputTestImplInput input,
+            GraphNode<String, ParentGivenGraphNodeTestImplInput> result,
+            ParentGivenGraphNodeTestImplInput input,
             PathType expectedPathType,
-            List<GraphNode<String, ParentGivenGraphNodeInputTestImplInput>> expectedParents,
-            List<GraphNode<String, ParentGivenGraphNodeInputTestImplInput>> expectedChildren
+            List<GraphNode<String, ParentGivenGraphNodeTestImplInput>> expectedParents,
+            List<GraphNode<String, ParentGivenGraphNodeTestImplInput>> expectedChildren
     ) {
         assert result.id == input.id
         assert result.object == input.object
@@ -194,96 +194,96 @@ class ParentGivenGraphParserTest extends Specification {
         assert input.parentIds.containsAll(result.parentNodes.collect { it -> it.id })
     }
 
-    List<ParentGivenGraphNodeInputTestImplInput> generateGraphWithNullNodes() {
+    List<ParentGivenGraphNodeTestImplInput> generateGraphWithNullNodes() {
         [
-                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
+                new ParentGivenGraphNodeTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeTestImplInput(id: "002", parentIds: ["001"]),
                 null,
-                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
+                new ParentGivenGraphNodeTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeTestImplInput(id: "START", parentIds: ["004"]),
         ]
     }
 
-    List<ParentGivenGraphNodeInputTestImplInput> generateGraphWithNullNodeIds() {
+    List<ParentGivenGraphNodeTestImplInput> generateGraphWithNullNodeIds() {
         [
-                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: null, parentIds: ["004"]),
+                new ParentGivenGraphNodeTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeTestImplInput(id: "002", parentIds: ["001"]),
+                new ParentGivenGraphNodeTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeTestImplInput(id: "START", parentIds: ["004"]),
+                new ParentGivenGraphNodeTestImplInput(id: null, parentIds: ["004"]),
         ]
     }
 
-    List<ParentGivenGraphNodeInputTestImplInput> generateGraphWithDuplicates() {
+    List<ParentGivenGraphNodeTestImplInput> generateGraphWithDuplicates() {
         [
-                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002", "003"]),
+                new ParentGivenGraphNodeTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeTestImplInput(id: "002", parentIds: ["001"]),
+                new ParentGivenGraphNodeTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeTestImplInput(id: "START", parentIds: ["004"]),
+                new ParentGivenGraphNodeTestImplInput(id: "003", parentIds: ["002", "003"]),
         ]
     }
 
-    List<ParentGivenGraphNodeInputTestImplInput> generateSingleElementGraph() {
+    List<ParentGivenGraphNodeTestImplInput> generateSingleElementGraph() {
         [
-                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: [],)
+                new ParentGivenGraphNodeTestImplInput(id: "START", parentIds: [],)
         ]
     }
 
-    List<ParentGivenGraphNodeInputTestImplInput> generateOrderedSimpleGraph() {
+    List<ParentGivenGraphNodeTestImplInput> generateOrderedSimpleGraph() {
         [
-                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
+                new ParentGivenGraphNodeTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeTestImplInput(id: "002", parentIds: ["001"]),
+                new ParentGivenGraphNodeTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeTestImplInput(id: "START", parentIds: ["004"]),
         ]
     }
 
-    List<ParentGivenGraphNodeInputTestImplInput> generateUnorderedSimpleGraph() {
+    List<ParentGivenGraphNodeTestImplInput> generateUnorderedSimpleGraph() {
         [
-                new ParentGivenGraphNodeInputTestImplInput(id: "003", parentIds: ["002"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "004", parentIds: ["003"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["004"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "002", parentIds: ["001"]),
+                new ParentGivenGraphNodeTestImplInput(id: "003", parentIds: ["002"]),
+                new ParentGivenGraphNodeTestImplInput(id: "004", parentIds: ["003"]),
+                new ParentGivenGraphNodeTestImplInput(id: "001", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeTestImplInput(id: "START", parentIds: ["004"]),
+                new ParentGivenGraphNodeTestImplInput(id: "002", parentIds: ["001"]),
         ]
     }
 
-    List<ParentGivenGraphNodeInputTestImplInput> generateComplexGraphWithoutCycles() {
+    List<ParentGivenGraphNodeTestImplInput> generateComplexGraphWithoutCycles() {
         [
-                new ParentGivenGraphNodeInputTestImplInput(id: "M01", parentIds: ["UNKNOWN"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "M02", parentIds: ["M01"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "M03", parentIds: ["M02"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "C030", parentIds: ["M03"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "C031", parentIds: ["M03"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "C032", parentIds: ["C031"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "M04", parentIds: ["M03"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "M05", parentIds: ["M04"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "M06", parentIds: ["M05", "M07"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "M07", parentIds: []),
-                new ParentGivenGraphNodeInputTestImplInput(id: "C070", parentIds: ["M07"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "M08", parentIds: ["M05"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "M09", parentIds: ["M08"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "C090", parentIds: ["M09"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "M10", parentIds: ["M06", "M09"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "START", parentIds: ["M10"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "C100", parentIds: ["M10"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "C101", parentIds: ["C100"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "C102", parentIds: ["C100", "C101"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "AS00", parentIds: ["START"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "AS01", parentIds: ["START"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "AS02", parentIds: ["AS01"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER00", parentIds: ["OUTER-UNKNOWN"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER01", parentIds: ["OUTER00"]),
-                new ParentGivenGraphNodeInputTestImplInput(id: "OUTER02", parentIds: ["OUTER01"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M01", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M02", parentIds: ["M01"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M03", parentIds: ["M02"]),
+                new ParentGivenGraphNodeTestImplInput(id: "C030", parentIds: ["M03"]),
+                new ParentGivenGraphNodeTestImplInput(id: "C031", parentIds: ["M03"]),
+                new ParentGivenGraphNodeTestImplInput(id: "C032", parentIds: ["C031"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M04", parentIds: ["M03"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M05", parentIds: ["M04"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M06", parentIds: ["M05", "M07"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M07", parentIds: []),
+                new ParentGivenGraphNodeTestImplInput(id: "C070", parentIds: ["M07"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M08", parentIds: ["M05"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M09", parentIds: ["M08"]),
+                new ParentGivenGraphNodeTestImplInput(id: "C090", parentIds: ["M09"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M10", parentIds: ["M06", "M09"]),
+                new ParentGivenGraphNodeTestImplInput(id: "START", parentIds: ["M10"]),
+                new ParentGivenGraphNodeTestImplInput(id: "C100", parentIds: ["M10"]),
+                new ParentGivenGraphNodeTestImplInput(id: "C101", parentIds: ["C100"]),
+                new ParentGivenGraphNodeTestImplInput(id: "C102", parentIds: ["C100", "C101"]),
+                new ParentGivenGraphNodeTestImplInput(id: "AS00", parentIds: ["START"]),
+                new ParentGivenGraphNodeTestImplInput(id: "AS01", parentIds: ["START"]),
+                new ParentGivenGraphNodeTestImplInput(id: "AS02", parentIds: ["AS01"]),
+                new ParentGivenGraphNodeTestImplInput(id: "OUTER00", parentIds: ["OUTER-UNKNOWN"]),
+                new ParentGivenGraphNodeTestImplInput(id: "OUTER01", parentIds: ["OUTER00"]),
+                new ParentGivenGraphNodeTestImplInput(id: "OUTER02", parentIds: ["OUTER01"]),
         ]
     }
 
-    List<ParentGivenGraphNodeInputTestImplInput> generateComplexGraphWithCycles() {
+    List<ParentGivenGraphNodeTestImplInput> generateComplexGraphWithCycles() {
         throw new RuntimeException("NOT IMPLEMENTED")
     }
 }

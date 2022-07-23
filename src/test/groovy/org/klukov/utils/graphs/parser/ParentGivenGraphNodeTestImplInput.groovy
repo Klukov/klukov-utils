@@ -1,6 +1,6 @@
 package org.klukov.utils.graphs.parser
 
-class ParentGivenGraphNodeInputTestImplInput implements ParentGivenGraphNodeInputInput<String, ParentGivenGraphNodeInputTestImplInput> {
+class ParentGivenGraphNodeTestImplInput implements ParentGivenGraphNodeInput<String, ParentGivenGraphNodeTestImplInput> {
 
     private String id
     private Collection<String> parentIds
@@ -16,7 +16,7 @@ class ParentGivenGraphNodeInputTestImplInput implements ParentGivenGraphNodeInpu
     }
 
     @Override
-    ParentGivenGraphNodeInputTestImplInput getObject() {
+    ParentGivenGraphNodeTestImplInput getObject() {
         return this
     }
 }
