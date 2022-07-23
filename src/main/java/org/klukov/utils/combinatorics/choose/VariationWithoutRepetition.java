@@ -12,6 +12,10 @@ public final class VariationWithoutRepetition<T> {
     private final ChoosableCommons<T> choosableCommons;
     private final RandomFrictionQuery randomFrictionQuery;
 
+    public VariationWithoutRepetition() {
+        this(new RandomService());
+    }
+
     public VariationWithoutRepetition(RandomFrictionQuery randomFrictionQuery) {
         this.inputValidator = new InputValidator<>();
         this.choosableCommons = new ChoosableCommons<>();
