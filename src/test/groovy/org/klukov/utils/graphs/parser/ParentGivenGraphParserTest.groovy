@@ -1,14 +1,14 @@
 package org.klukov.utils.graphs.parser
 
-import org.klukov.utils.graphs.GraphProcessingException
-import org.klukov.utils.graphs.ProcessingErrorType
+import org.klukov.utils.graphs.common.GraphProcessingException
+import org.klukov.utils.graphs.common.ProcessingErrorType
 import spock.lang.Specification
 import spock.lang.Subject
 
 class ParentGivenGraphParserTest extends Specification {
 
     @Subject
-    ParentGivenGraphParser<String, ParentGivenGraphNodeTestImplInput> sub = new ParentGivenGraphParser<>()
+    ParentGivenGraphParserService<String, ParentGivenGraphNodeTestImplInput> sub = new ParentGivenGraphParserService<>()
 
     def "should throw exception if graph is null or empty"() {
         given:
@@ -179,11 +179,11 @@ class ParentGivenGraphParserTest extends Specification {
     }
 
     private static void assertGraphNode(
-            GraphNode<String, ParentGivenGraphNodeTestImplInput> result,
+            ParentGivenGraphNodeResult<String, ParentGivenGraphNodeTestImplInput> result,
             ParentGivenGraphNodeTestImplInput input,
             PathType expectedPathType,
-            List<GraphNode<String, ParentGivenGraphNodeTestImplInput>> expectedParents,
-            List<GraphNode<String, ParentGivenGraphNodeTestImplInput>> expectedChildren
+            List<ParentGivenGraphNodeResult<String, ParentGivenGraphNodeTestImplInput>> expectedParents,
+            List<ParentGivenGraphNodeResult<String, ParentGivenGraphNodeTestImplInput>> expectedChildren
     ) {
         assert result.id == input.id
         assert result.object == input.object

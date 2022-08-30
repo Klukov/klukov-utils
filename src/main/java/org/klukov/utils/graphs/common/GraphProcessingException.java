@@ -1,4 +1,4 @@
-package org.klukov.utils.graphs;
+package org.klukov.utils.graphs.common;
 
 import lombok.Getter;
 

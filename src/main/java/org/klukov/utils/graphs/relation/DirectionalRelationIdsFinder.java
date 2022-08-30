@@ -1,9 +1,8 @@
-package org.klukov.utils.graphs.relation.directional;
+package org.klukov.utils.graphs.relation;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.klukov.utils.graphs.GraphProcessingException;
-import org.klukov.utils.graphs.relation.GraphNodeInput;
-import org.klukov.utils.graphs.relation.RelationIdsFinderInput;
+import org.klukov.utils.graphs.common.GraphProcessingException;
 import org.klukov.utils.graphs.validation.GraphValidator;
 
 import java.util.Collection;
@@ -17,10 +16,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class DirectionalRelationIdsFinder<ID, T extends GraphNodeInput<ID>> {
+@AllArgsConstructor
+class DirectionalRelationIdsFinder<ID, T extends GraphNodeInput<ID>> implements DirectionalRelationIdsQuery<ID, T> {
 
-    private final GraphValidator<ID, T> graphValidator = new GraphValidator<>();
+    private final GraphValidator<ID, T> graphValidator;
 
+    @Override
     public Set<ID> findAllConnectedIds(RelationIdsFinderInput<ID, T> input) throws GraphProcessingException {
         validateInput(input);
         var graphElementsMap = getGraphElementsMap(input.getGraphInput());

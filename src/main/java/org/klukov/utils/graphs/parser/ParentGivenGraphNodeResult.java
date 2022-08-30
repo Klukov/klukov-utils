@@ -14,7 +14,7 @@ import java.util.Set;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
 @ToString
-public final class GraphNode<ID, T> {
+public final class ParentGivenGraphNodeResult<ID, T> {
 
     @EqualsAndHashCode.Include
     private final ID id;
@@ -24,24 +24,24 @@ public final class GraphNode<ID, T> {
     private final PathType startNodePathType;
 
     @ToString.Exclude
-    private final Set<GraphNode<ID, T>> parentNodes = new HashSet<>();
+    private final Set<ParentGivenGraphNodeResult<ID, T>> parentNodes = new HashSet<>();
 
     @ToString.Exclude
-    private final Set<GraphNode<ID, T>> childNodes = new HashSet<>();
+    private final Set<ParentGivenGraphNodeResult<ID, T>> childNodes = new HashSet<>();
 
-    void addChild(GraphNode<ID, T> node) {
+    void addChild(ParentGivenGraphNodeResult<ID, T> node) {
         childNodes.add(node);
     }
 
-    void addParent(GraphNode<ID, T> node) {
+    void addParent(ParentGivenGraphNodeResult<ID, T> node) {
         parentNodes.add(node);
     }
 
-    public Set<GraphNode<ID, T>> getParentNodes() {
+    public Set<ParentGivenGraphNodeResult<ID, T>> getParentNodes() {
         return Set.copyOf(parentNodes);
     }
 
-    public Set<GraphNode<ID, T>> getChildNodes() {
+    public Set<ParentGivenGraphNodeResult<ID, T>> getChildNodes() {
         return Set.copyOf(childNodes);
     }
 }

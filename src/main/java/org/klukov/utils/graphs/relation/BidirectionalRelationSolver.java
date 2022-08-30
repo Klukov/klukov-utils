@@ -1,6 +1,6 @@
-package org.klukov.utils.graphs.relation.bidirectional;
+package org.klukov.utils.graphs.relation;
 
-import org.klukov.utils.graphs.GraphEdge;
+import org.klukov.utils.graphs.common.GraphEdge;
 
 import java.util.Collection;
 import java.util.Collections;

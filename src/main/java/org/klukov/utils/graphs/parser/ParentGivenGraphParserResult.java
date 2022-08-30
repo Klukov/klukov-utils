@@ -8,9 +8,9 @@ import java.util.Map;
 @Builder
 @RequiredArgsConstructor
 public final class ParentGivenGraphParserResult<ID, T> {
-    private final Map<ID, GraphNode<ID, T>> graphNodes;
+    private final Map<ID, ParentGivenGraphNodeResult<ID, T>> graphNodes;
 
-    public Map<ID, GraphNode<ID, T>> getGraphNodes() {
+    public Map<ID, ParentGivenGraphNodeResult<ID, T>> getGraphNodes() {
         return Map.copyOf(graphNodes);
     }
 }

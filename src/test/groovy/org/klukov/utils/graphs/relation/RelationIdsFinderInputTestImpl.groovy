@@ -1,6 +1,4 @@
-package org.klukov.utils.graphs.relation.directional
-
-import org.klukov.utils.graphs.relation.RelationIdsFinderInput
+package org.klukov.utils.graphs.relation
 
 class RelationIdsFinderInputTestImpl implements RelationIdsFinderInput<String, GraphNodeInputTestImpl> {
 

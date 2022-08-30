@@ -1,7 +1,7 @@
-package org.klukov.utils.graphs.relation.directional
+package org.klukov.utils.graphs.relation
 
-import org.klukov.utils.graphs.GraphProcessingException
-import org.klukov.utils.graphs.ProcessingErrorType
+import org.klukov.utils.graphs.common.GraphProcessingException
+import org.klukov.utils.graphs.common.ProcessingErrorType
 import spock.lang.Specification
 import spock.lang.Subject
 

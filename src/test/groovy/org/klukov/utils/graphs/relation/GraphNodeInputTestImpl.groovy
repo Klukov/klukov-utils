@@ -1,6 +1,4 @@
-package org.klukov.utils.graphs.relation.directional
-
-import org.klukov.utils.graphs.relation.GraphNodeInput
+package org.klukov.utils.graphs.relation
 
 class GraphNodeInputTestImpl implements GraphNodeInput<String> {
 

@@ -4,7 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.klukov.utils.graphs.GraphEdge;
+import org.klukov.utils.graphs.common.GraphEdge;
 
 @Getter
 @EqualsAndHashCode

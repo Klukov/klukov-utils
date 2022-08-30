@@ -1,4 +1,4 @@
-package org.klukov.utils.graphs;
+package org.klukov.utils.graphs.common;
 
 public enum ProcessingErrorType {
     NULL_OR_EMPTY_GRAPH,
