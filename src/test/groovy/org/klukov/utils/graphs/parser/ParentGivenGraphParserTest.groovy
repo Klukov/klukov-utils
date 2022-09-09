@@ -1,21 +1,18 @@
 package org.klukov.utils.graphs.parser
 
+import org.klukov.utils.graphs.GraphUtils
 import org.klukov.utils.graphs.common.GraphProcessingException
 import org.klukov.utils.graphs.common.ProcessingErrorType
 import spock.lang.Specification
-import spock.lang.Subject
 
 class ParentGivenGraphParserTest extends Specification {
-
-    @Subject
-    ParentGivenGraphParserService<String, ParentGivenGraphNodeTestImplInput> sub = new ParentGivenGraphParserService<>()
 
     def "should throw exception if graph is null or empty"() {
         given:
         def startNodeId = 'START'
 
         when:
-        sub.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
+        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -29,7 +26,7 @@ class ParentGivenGraphParserTest extends Specification {
 
     def "should throw exception if start element is null"() {
         when:
-        sub.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), null))
+        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), null))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -41,7 +38,7 @@ class ParentGivenGraphParserTest extends Specification {
         def startNodeId = 'notMatchedId'
 
         when:
-        sub.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), startNodeId))
+        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -53,7 +50,7 @@ class ParentGivenGraphParserTest extends Specification {
         def startNodeId = 'START'
 
         when:
-        sub.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
+        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -70,7 +67,7 @@ class ParentGivenGraphParserTest extends Specification {
         def startNodeId = 'START'
 
         when:
-        sub.parseGraphCollection(new ParentGivenGraphParseInput(generateGraphWithDuplicates(), startNodeId))
+        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(generateGraphWithDuplicates(), startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -80,10 +77,11 @@ class ParentGivenGraphParserTest extends Specification {
     def "should parse single element graph"() {
         given:
         def graphInput = generateSingleElementGraph()
+        def startNodeId = graphInput[0].id
 
         when:
-        def result = sub.parseGraphCollection(
-                new ParentGivenGraphParseInput(graphInput, graphInput[0].id))
+        ParentGivenGraphParserResult<String, ParentGivenGraphNodeTestImplInput> result =
+                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def nodesMap = result.graphNodes
@@ -94,9 +92,11 @@ class ParentGivenGraphParserTest extends Specification {
     def "should parse simple graph"() {
         given:
         def graphInput = generateOrderedSimpleGraph()
+        def startNodeId = graphInput[4].id
 
         when:
-        def result = sub.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, graphInput[4].id))
+        ParentGivenGraphParserResult<String, ParentGivenGraphNodeTestImplInput> result =
+                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def nodesMap = result.graphNodes
@@ -112,11 +112,11 @@ class ParentGivenGraphParserTest extends Specification {
     def "should parse simple graph from unordered list"() {
         given:
         def graphInput = generateUnorderedSimpleGraph()
+        def startNodeId = graphInput[3].id
 
         when:
-        def startNodeId = graphInput[3].id
-        def result = sub.parseGraphCollection(
-                new ParentGivenGraphParseInput(graphInput, startNodeId))
+        ParentGivenGraphParserResult<String, ParentGivenGraphNodeTestImplInput> result =
+                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def nodesMap = result.graphNodes
@@ -134,8 +134,8 @@ class ParentGivenGraphParserTest extends Specification {
         def graphInput = generateComplexGraphWithoutCycles()
 
         when:
-        def result = sub.parseGraphCollection(
-                new ParentGivenGraphParseInput(graphInput, 'START'))
+        ParentGivenGraphParserResult<String, ParentGivenGraphNodeTestImplInput> result =
+                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
 
         then:
         def nodesMap = result.graphNodes
@@ -167,12 +167,31 @@ class ParentGivenGraphParserTest extends Specification {
         assertGraphNode(nodesMap['OUTER02'], graphInput[24], PathType.OUTER, [nodesMap['OUTER01']], [])
     }
 
+    def "should parse simple graph with cycles"() {
+        given:
+        def graphInput = generateSimpleGraphWithCycles()
+
+        when:
+        ParentGivenGraphParserResult<String, ParentGivenGraphNodeTestImplInput> result =
+                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
+
+        then:
+        def nodesMap = result.graphNodes
+        nodesMap.size() == graphInput.size()
+        assertGraphNode(nodesMap['M01'], graphInput[0], PathType.MAIN, [], [nodesMap['M02']])
+        assertGraphNode(nodesMap['M02'], graphInput[1], PathType.MAIN, [nodesMap['M01'], nodesMap['M05']], [nodesMap['M03']])
+        assertGraphNode(nodesMap['M03'], graphInput[2], PathType.MAIN, [nodesMap['M02']], [nodesMap['M04']])
+        assertGraphNode(nodesMap['M04'], graphInput[3], PathType.MAIN, [nodesMap['M03']], [nodesMap['M05']])
+        assertGraphNode(nodesMap['M05'], graphInput[4], PathType.MAIN, [nodesMap['M04']], [nodesMap['M02'], nodesMap['START']])
+        assertGraphNode(nodesMap['START'], graphInput[5], PathType.MAIN, [nodesMap['M05']], [])
+    }
+
     def "should parse complex graph with cycles"() {
         given:
         def graphInput = generateComplexGraphWithCycles()
 
         when:
-        sub.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
+        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
 
         then:
         noExceptionThrown()
@@ -283,7 +302,24 @@ class ParentGivenGraphParserTest extends Specification {
         ]
     }
 
+    List<ParentGivenGraphNodeTestImplInput> generateSimpleGraphWithCycles() {
+        [
+                new ParentGivenGraphNodeTestImplInput(id: "M01", parentIds: ["UNKNOWN"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M02", parentIds: ["M01", "M05"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M03", parentIds: ["M02"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M04", parentIds: ["M03"]),
+                new ParentGivenGraphNodeTestImplInput(id: "M05", parentIds: ["M04"]),
+                new ParentGivenGraphNodeTestImplInput(id: "START", parentIds: ["M05"]),
+        ]
+    }
+
     List<ParentGivenGraphNodeTestImplInput> generateComplexGraphWithCycles() {
         throw new RuntimeException("NOT IMPLEMENTED")
+        [
+
+                new ParentGivenGraphNodeTestImplInput(id: "OUTER00", parentIds: ["OUTER-UNKNOWN"]),
+                new ParentGivenGraphNodeTestImplInput(id: "OUTER01", parentIds: ["OUTER00"]),
+                new ParentGivenGraphNodeTestImplInput(id: "OUTER02", parentIds: ["OUTER01"]),
+        ]
     }
 }
