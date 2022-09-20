@@ -23,6 +23,7 @@ public final class VariationWithoutRepetition<T> {
     }
 
     public List<T> choose(Collection<ChoosableWrapper<T>> objects, int k) {
+        //todo: optimize it for big k
         validateInput(objects, k);
         var clonedObjects = cloneObjects(objects);
         var wrappedResults = new LinkedList<ChoosableWrapper<T>>();
