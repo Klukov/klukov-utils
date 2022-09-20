@@ -2,13 +2,15 @@ package org.klukov.utils.graphs.relation
 
 import org.klukov.utils.graphs.common.GraphProcessingException
 import org.klukov.utils.graphs.common.ProcessingErrorType
+import org.klukov.utils.graphs.validation.GraphValidatorFactory
 import spock.lang.Specification
 import spock.lang.Subject
 
 class DirectionalRelationIdsFinderTest extends Specification {
 
     @Subject
-    DirectionalRelationIdsFinder<String, GraphNodeInputTestImpl> sub = new DirectionalRelationIdsFinder<>()
+    DirectionalRelationIdsFinder<String, GraphNodeInputTestImpl> sub =
+            GraphRelationFactory.directionalRelationIdsQuery(GraphValidatorFactory.graphValidator())
 
     def "should throw exception if start id is null"() {
         when:
@@ -103,20 +105,23 @@ class DirectionalRelationIdsFinderTest extends Specification {
         generateUnorderedSimpleGraph() || _
     }
 
-    def "should properly process complex graph without cycles"() {
+    def "should properly process complex graphs"() {
         when:
-        throw new RuntimeException("Not Implemented")
+        def result = sub.findAllConnectedIds(
+                new RelationIdsFinderInputTestImpl(
+                        startNodeId: 'START',
+                        graphInput: givenGraph,
+                ))
+        def expectedNodes = givenGraph.findAll { it.id.startsWith("M") }.collect({ it.id }) + "START"
 
         then:
-        noExceptionThrown()
-    }
+        result == expectedNodes.toSet()
 
-    def "should properly process complex graph with cycles"() {
-        when:
-        throw new RuntimeException("Not Implemented")
-
-        then:
-        noExceptionThrown()
+        where:
+        givenGraph                          || _
+        generateComplexGraphWithoutCycles() || _
+        generateSimpleGraphWithCycles()     || _
+        // todo: when parentGiven graphNode input test with complex graphWithCycles will be done then add it here
     }
 
     List<GraphNodeInputTestImpl> generateGraphWithNullNodes() {
@@ -205,6 +210,17 @@ class DirectionalRelationIdsFinderTest extends Specification {
                 new GraphNodeInputTestImpl(id: "OUTER01", relatedIds: ["OUTER-UNKNOWN"]),
                 new GraphNodeInputTestImpl(id: "OUTER02", relatedIds: ["OUTER01"]),
                 new GraphNodeInputTestImpl(id: "OUTER03", relatedIds: ["OUTER02"]),
+        ]
+    }
+
+    List<GraphNodeInputTestImpl> generateSimpleGraphWithCycles() {
+        [
+                new GraphNodeInputTestImpl(id: "M01", relatedIds: ["UNKNOWN"]),
+                new GraphNodeInputTestImpl(id: "M02", relatedIds: ["M01", "M05"]),
+                new GraphNodeInputTestImpl(id: "M03", relatedIds: ["M02"]),
+                new GraphNodeInputTestImpl(id: "M04", relatedIds: ["M03"]),
+                new GraphNodeInputTestImpl(id: "M05", relatedIds: ["M04"]),
+                new GraphNodeInputTestImpl(id: "START", relatedIds: ["M05"]),
         ]
     }
 }
