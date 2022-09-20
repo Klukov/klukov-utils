@@ -31,15 +31,15 @@ class ParentGivenGraphParserService<ID, T extends ParentGivenGraphNodeInput<ID, 
     public ParentGivenGraphParserResult<ID, T> parseGraphCollection(
             ParentGivenGraphParseInput<ID, T> parentGivenGraphParseInput
     ) throws GraphProcessingException {
-        log.info("Starting validation of input: {}", parentGivenGraphParseInput);
+        log.debug("Starting validation of input: {}", parentGivenGraphParseInput);
         validate(parentGivenGraphParseInput);
-        log.info("Validation finished. Starting generating edges");
+        log.debug("Validation finished. Starting generating edges");
         var edges = generateEdges(parentGivenGraphParseInput.getGraphInput());
-        log.info("Generated edges: {}", edges);
+        log.debug("Generated edges: {}", edges);
         var nodesMap = generateNodesMap(parentGivenGraphParseInput, edges);
-        log.info("Generated nodes: {}", nodesMap);
+        log.debug("Generated nodes: {}", nodesMap);
         edges.forEach(graphParserEdge -> connectNodes(graphParserEdge, nodesMap));
-        log.info("All edges are connected");
+        log.debug("All edges are connected");
         return ParentGivenGraphParserResult.<ID, T>builder()
                 .graphNodes(nodesMap)
                 .build();
@@ -65,11 +65,11 @@ class ParentGivenGraphParserService<ID, T extends ParentGivenGraphNodeInput<ID, 
             Set<GraphParserEdge<ID>> graphParserEdges
     ) throws GraphProcessingException {
         var mainNodeIds = findAllMainNodeIds(parentGivenGraphParseInput);
-        log.info("Found main node ids: {}", mainNodeIds);
+        log.debug("Found main node ids: {}", mainNodeIds);
         var connectedNodeIds = findAllConnectedNodeIds(
                 parentGivenGraphParseInput.getStartNodeId(),
                 graphParserEdges);
-        log.info("Found connected commits ids: {}", connectedNodeIds);
+        log.debug("Found connected commits ids: {}", connectedNodeIds);
         return parentGivenGraphParseInput.getGraphInput().stream()
                 .map(nodeInput -> convertToResponseNode(nodeInput, mainNodeIds, connectedNodeIds))
                 .collect(Collectors.toMap(ParentGivenGraphNodeResult::getId, node -> node));

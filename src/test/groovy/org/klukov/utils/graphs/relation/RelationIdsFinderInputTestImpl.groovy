@@ -14,4 +14,12 @@ class RelationIdsFinderInputTestImpl implements RelationIdsFinderInput<String, G
     Collection<GraphNodeInputTestImpl> getGraphInput() {
         return graphInput
     }
+
+    @Override
+    String toString() {
+        return "RelationIdsFinderInputTestImpl{" +
+                "startNodeId='" + startNodeId + '\'' +
+                ", graphInput=" + graphInput +
+                '}'
+    }
 }

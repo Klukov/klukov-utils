@@ -14,4 +14,12 @@ class GraphNodeInputTestImpl implements GraphNodeInput<String> {
     Collection<String> getRelatedIds() {
         return relatedIds
     }
+
+    @Override
+    String toString() {
+        return "GraphNodeInputTestImpl{" +
+                "id='" + id + '\'' +
+                ", relatedIds=" + relatedIds +
+                '}'
+    }
 }

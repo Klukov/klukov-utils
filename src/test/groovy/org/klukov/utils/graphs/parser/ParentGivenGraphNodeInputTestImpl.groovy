@@ -19,4 +19,12 @@ class ParentGivenGraphNodeInputTestImpl implements ParentGivenGraphNodeInput<Str
     ParentGivenGraphNodeInputTestImpl getObject() {
         return this
     }
+
+    @Override
+    String toString() {
+        return "ParentGivenGraphNodeInputTestImpl{" +
+                "id='" + id + '\'' +
+                ", parentIds=" + parentIds +
+                '}'
+    }
 }

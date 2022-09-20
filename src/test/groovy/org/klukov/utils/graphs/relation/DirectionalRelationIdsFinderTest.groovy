@@ -121,10 +121,10 @@ class DirectionalRelationIdsFinderTest extends Specification {
         givenGraph                          || _
         generateComplexGraphWithoutCycles() || _
         generateSimpleGraphWithCycles()     || _
-        // todo: when parentGiven graphNode input test with complex graphWithCycles will be done then add it here
+        generateComplexGraphWithCycles() || _
     }
 
-    List<GraphNodeInputTestImpl> generateGraphWithNullNodes() {
+    private static List<GraphNodeInputTestImpl> generateGraphWithNullNodes() {
         [
                 new GraphNodeInputTestImpl(id: "001", relatedIds: ["UNKNOWN"]),
                 new GraphNodeInputTestImpl(id: "002", relatedIds: ["001"]),
@@ -135,7 +135,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
         ]
     }
 
-    List<GraphNodeInputTestImpl> generateGraphWithNullNodeIds() {
+    private static List<GraphNodeInputTestImpl> generateGraphWithNullNodeIds() {
         [
                 new GraphNodeInputTestImpl(id: "001", relatedIds: ["UNKNOWN"]),
                 new GraphNodeInputTestImpl(id: "002", relatedIds: ["001"]),
@@ -146,7 +146,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
         ]
     }
 
-    List<GraphNodeInputTestImpl> generateGraphWithDuplicates() {
+    private static List<GraphNodeInputTestImpl> generateGraphWithDuplicates() {
         [
                 new GraphNodeInputTestImpl(id: "001", relatedIds: ["UNKNOWN"]),
                 new GraphNodeInputTestImpl(id: "002", relatedIds: ["001"]),
@@ -157,13 +157,13 @@ class DirectionalRelationIdsFinderTest extends Specification {
         ]
     }
 
-    List<GraphNodeInputTestImpl> generateSingleElementGraph() {
+    private static List<GraphNodeInputTestImpl> generateSingleElementGraph() {
         [
                 new GraphNodeInputTestImpl(id: "START", relatedIds: [],)
         ]
     }
 
-    List<GraphNodeInputTestImpl> generateOrderedSimpleGraph() {
+    private static List<GraphNodeInputTestImpl> generateOrderedSimpleGraph() {
         [
                 new GraphNodeInputTestImpl(id: "001", relatedIds: ["UNKNOWN"]),
                 new GraphNodeInputTestImpl(id: "002", relatedIds: ["001"]),
@@ -173,7 +173,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
         ]
     }
 
-    List<GraphNodeInputTestImpl> generateUnorderedSimpleGraph() {
+    private static List<GraphNodeInputTestImpl> generateUnorderedSimpleGraph() {
         [
                 new GraphNodeInputTestImpl(id: "003", relatedIds: ["002"]),
                 new GraphNodeInputTestImpl(id: "004", relatedIds: ["003"]),
@@ -183,7 +183,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
         ]
     }
 
-    List<GraphNodeInputTestImpl> generateComplexGraphWithoutCycles() {
+    private static List<GraphNodeInputTestImpl> generateComplexGraphWithoutCycles() {
         [
                 new GraphNodeInputTestImpl(id: "M01", relatedIds: ["UNKNOWN"]),
                 new GraphNodeInputTestImpl(id: "M02", relatedIds: ["M01"]),
@@ -213,7 +213,7 @@ class DirectionalRelationIdsFinderTest extends Specification {
         ]
     }
 
-    List<GraphNodeInputTestImpl> generateSimpleGraphWithCycles() {
+    private static List<GraphNodeInputTestImpl> generateSimpleGraphWithCycles() {
         [
                 new GraphNodeInputTestImpl(id: "M01", relatedIds: ["UNKNOWN"]),
                 new GraphNodeInputTestImpl(id: "M02", relatedIds: ["M01", "M05"]),
@@ -221,6 +221,36 @@ class DirectionalRelationIdsFinderTest extends Specification {
                 new GraphNodeInputTestImpl(id: "M04", relatedIds: ["M03"]),
                 new GraphNodeInputTestImpl(id: "M05", relatedIds: ["M04"]),
                 new GraphNodeInputTestImpl(id: "START", relatedIds: ["M05"]),
+        ]
+    }
+
+    private static List<GraphNodeInputTestImpl> generateComplexGraphWithCycles() {
+        [
+                new GraphNodeInputTestImpl(id: "M01", relatedIds: ["UNKNOWN"]),
+                new GraphNodeInputTestImpl(id: "M02", relatedIds: ["M01"]),
+                new GraphNodeInputTestImpl(id: "M03", relatedIds: ["M02"]),
+                new GraphNodeInputTestImpl(id: "C030", relatedIds: ["M03"]),
+                new GraphNodeInputTestImpl(id: "C031", relatedIds: ["M03"]),
+                new GraphNodeInputTestImpl(id: "C032", relatedIds: ["C031"]),
+                new GraphNodeInputTestImpl(id: "M04", relatedIds: ["M03", "M08"]),
+                new GraphNodeInputTestImpl(id: "M05", relatedIds: ["M04"]),
+                new GraphNodeInputTestImpl(id: "M06", relatedIds: ["M05", "M07"]),
+                new GraphNodeInputTestImpl(id: "M07", relatedIds: []),
+                new GraphNodeInputTestImpl(id: "C070", relatedIds: ["M07"]),
+                new GraphNodeInputTestImpl(id: "M08", relatedIds: ["M09"]),
+                new GraphNodeInputTestImpl(id: "M09", relatedIds: ["M10"]),
+                new GraphNodeInputTestImpl(id: "C090", relatedIds: ["M09"]),
+                new GraphNodeInputTestImpl(id: "M10", relatedIds: ["M06"]),
+                new GraphNodeInputTestImpl(id: "START", relatedIds: ["M10"]),
+                new GraphNodeInputTestImpl(id: "C100", relatedIds: ["M10", "C102"]),
+                new GraphNodeInputTestImpl(id: "C101", relatedIds: ["C100"]),
+                new GraphNodeInputTestImpl(id: "C102", relatedIds: ["C101"]),
+                new GraphNodeInputTestImpl(id: "AS00", relatedIds: ["START"]),
+                new GraphNodeInputTestImpl(id: "AS01", relatedIds: ["START"]),
+                new GraphNodeInputTestImpl(id: "AS02", relatedIds: ["AS01"]),
+                new GraphNodeInputTestImpl(id: "OUTER00", relatedIds: ["OUTER-UNKNOWN"]),
+                new GraphNodeInputTestImpl(id: "OUTER01", relatedIds: ["OUTER00"]),
+                new GraphNodeInputTestImpl(id: "OUTER02", relatedIds: ["OUTER01"]),
         ]
     }
 }
