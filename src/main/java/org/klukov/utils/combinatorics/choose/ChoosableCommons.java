@@ -1,14 +1,14 @@
 package org.klukov.utils.combinatorics.choose;
 
-import org.klukov.utils.java.BigDecimalUtils;
-
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.TreeMap;
+import org.klukov.utils.java.BigDecimalUtils;
 
 class ChoosableCommons<T> {
 
-    TreeMap<BigDecimal, ChoosableWrapper<T>> generateProbabilityCoefficientMap(Collection<ChoosableWrapper<T>> objects) {
+    TreeMap<BigDecimal, ChoosableWrapper<T>> generateProbabilityCoefficientMap(
+            Collection<ChoosableWrapper<T>> objects) {
         var result = new TreeMap<BigDecimal, ChoosableWrapper<T>>();
         var sumHelper = BigDecimal.ZERO;
         for (var object : objects) {
@@ -20,7 +20,8 @@ class ChoosableCommons<T> {
         return result;
     }
 
-    ChoosableWrapper<T> getElementByRandom(TreeMap<BigDecimal, ChoosableWrapper<T>> probabilityCoefficients, BigDecimal random) {
+    ChoosableWrapper<T> getElementByRandom(
+            TreeMap<BigDecimal, ChoosableWrapper<T>> probabilityCoefficients, BigDecimal random) {
         var highestProbabilityCoefficient = probabilityCoefficients.lastEntry();
         if (BigDecimalUtils.areEqual(highestProbabilityCoefficient.getKey(), random)) {
             return highestProbabilityCoefficient.getValue();

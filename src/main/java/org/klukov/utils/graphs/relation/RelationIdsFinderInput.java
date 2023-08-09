@@ -1,10 +1,10 @@
 package org.klukov.utils.graphs.relation;
 
+import java.util.Collection;
 import org.klukov.utils.graphs.validation.ValidatableGraphInput;
 
-import java.util.Collection;
-
-public interface RelationIdsFinderInput<ID, T extends GraphNodeInput<ID>> extends ValidatableGraphInput<ID, T> {
+public interface RelationIdsFinderInput<ID, T extends GraphNodeInput<ID>>
+        extends ValidatableGraphInput<ID, T> {
 
     ID getStartNodeId();
 

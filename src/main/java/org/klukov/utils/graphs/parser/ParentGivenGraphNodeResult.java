@@ -1,13 +1,12 @@
 package org.klukov.utils.graphs.parser;
 
+import java.util.HashSet;
+import java.util.Set;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Builder
 @Getter
@@ -16,8 +15,7 @@ import java.util.Set;
 @ToString
 public final class ParentGivenGraphNodeResult<ID, T> {
 
-    @EqualsAndHashCode.Include
-    private final ID id;
+    @EqualsAndHashCode.Include private final ID id;
 
     private final T object;
 

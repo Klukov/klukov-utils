@@ -1,8 +1,7 @@
 package org.klukov.utils.graphs.relation;
 
-import org.klukov.utils.graphs.validation.ValidatableGraphNodeInput;
-
 import java.util.Collection;
+import org.klukov.utils.graphs.validation.ValidatableGraphNodeInput;
 
 public interface GraphNodeInput<ID> extends ValidatableGraphNodeInput<ID> {
 

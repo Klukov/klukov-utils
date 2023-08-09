@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'groovy'
+    id 'com.diffplug.spotless' version '6.20.0'
 }
 
 group 'org.klukov'
@@ -17,6 +18,23 @@ dependencies {
 
     testImplementation 'org.spockframework:spock-core:2.2-groovy-3.0'
     testImplementation 'org.codehaus.groovy:groovy:3.0.12'
+}
+
+spotless {
+    java {
+        importOrder()
+        removeUnusedImports()
+        cleanthat()
+        googleJavaFormat().aosp()
+        formatAnnotations()
+    }
+    groovy {
+        importOrder()
+        indentWithSpaces()
+        endWithNewline()
+        trimTrailingWhitespace()
+        excludeJava()
+    }
 }
 
 test {

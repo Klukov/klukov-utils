@@ -1,12 +1,11 @@
 package org.klukov.utils.graphs.parser;
 
+import java.util.Collection;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.klukov.utils.graphs.relation.RelationIdsFinderInput;
 import org.klukov.utils.graphs.validation.ValidatableGraphInput;
-
-import java.util.Collection;
 
 @Getter
 @Builder

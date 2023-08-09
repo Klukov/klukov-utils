@@ -10,9 +10,9 @@ public class GraphRelationFactory {
         return new BidirectionalRelationIdsFinder<>();
     }
 
-    public <ID, T extends GraphNodeInput<ID>> DirectionalRelationIdsQuery<ID, T> directionalRelationIdsQuery(
-            GraphValidator<ID, T> graphValidator
-    ) {
+    public <ID, T extends GraphNodeInput<ID>>
+            DirectionalRelationIdsQuery<ID, T> directionalRelationIdsQuery(
+                    GraphValidator<ID, T> graphValidator) {
         return new DirectionalRelationIdsFinder<>(graphValidator);
     }
 }

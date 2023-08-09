@@ -1,9 +1,8 @@
 package org.klukov.utils.graphs.relation;
 
-import org.klukov.utils.graphs.common.GraphEdge;
-
 import java.util.Collection;
 import java.util.Set;
+import org.klukov.utils.graphs.common.GraphEdge;
 
 public interface BidirectionalRelationIdsQuery<ID> {
 

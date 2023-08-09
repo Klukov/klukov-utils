@@ -1,5 +1,9 @@
 package org.klukov.utils.graphs.parser;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.klukov.utils.graphs.common.GraphEdge;
@@ -7,11 +11,6 @@ import org.klukov.utils.graphs.common.GraphProcessingException;
 import org.klukov.utils.graphs.relation.BidirectionalRelationIdsQuery;
 import org.klukov.utils.graphs.relation.DirectionalRelationIdsQuery;
 import org.klukov.utils.graphs.validation.GraphValidator;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @AllArgsConstructor
@@ -29,8 +28,8 @@ class ParentGivenGraphParserService<ID, T extends ParentGivenGraphNodeInput<ID, 
      */
     @Override
     public ParentGivenGraphParserResult<ID, T> parseGraphCollection(
-            ParentGivenGraphParseInput<ID, T> parentGivenGraphParseInput
-    ) throws GraphProcessingException {
+            ParentGivenGraphParseInput<ID, T> parentGivenGraphParseInput)
+            throws GraphProcessingException {
         log.debug("Starting validation of input: {}", parentGivenGraphParseInput);
         validate(parentGivenGraphParseInput);
         log.debug("Validation finished. Starting generating edges");
@@ -40,18 +39,16 @@ class ParentGivenGraphParserService<ID, T extends ParentGivenGraphNodeInput<ID, 
         log.debug("Generated nodes: {}", nodesMap);
         edges.forEach(graphParserEdge -> connectNodes(graphParserEdge, nodesMap));
         log.debug("All edges are connected");
-        return ParentGivenGraphParserResult.<ID, T>builder()
-                .graphNodes(nodesMap)
-                .build();
+        return ParentGivenGraphParserResult.<ID, T>builder().graphNodes(nodesMap).build();
     }
 
-    private void validate(
-            ParentGivenGraphParseInput<ID, T> parentGivenGraphParseInput
-    ) throws GraphProcessingException {
+    private void validate(ParentGivenGraphParseInput<ID, T> parentGivenGraphParseInput)
+            throws GraphProcessingException {
         graphValidator.validate(parentGivenGraphParseInput);
     }
 
-    private void connectNodes(GraphEdge<ID> graphEdge, Map<ID, ParentGivenGraphNodeResult<ID, T>> nodesMap) {
+    private void connectNodes(
+            GraphEdge<ID> graphEdge, Map<ID, ParentGivenGraphNodeResult<ID, T>> nodesMap) {
         var parent = nodesMap.get(graphEdge.getParentId());
         var child = nodesMap.get(graphEdge.getChildId());
         if (parent != null && child != null) {
@@ -62,13 +59,13 @@ class ParentGivenGraphParserService<ID, T extends ParentGivenGraphNodeInput<ID, 
 
     private Map<ID, ParentGivenGraphNodeResult<ID, T>> generateNodesMap(
             ParentGivenGraphParseInput<ID, T> parentGivenGraphParseInput,
-            Set<GraphParserEdge<ID>> graphParserEdges
-    ) throws GraphProcessingException {
+            Set<GraphParserEdge<ID>> graphParserEdges)
+            throws GraphProcessingException {
         var mainNodeIds = findAllMainNodeIds(parentGivenGraphParseInput);
         log.debug("Found main node ids: {}", mainNodeIds);
-        var connectedNodeIds = findAllConnectedNodeIds(
-                parentGivenGraphParseInput.getStartNodeId(),
-                graphParserEdges);
+        var connectedNodeIds =
+                findAllConnectedNodeIds(
+                        parentGivenGraphParseInput.getStartNodeId(), graphParserEdges);
         log.debug("Found connected commits ids: {}", connectedNodeIds);
         return parentGivenGraphParseInput.getGraphInput().stream()
                 .map(nodeInput -> convertToResponseNode(nodeInput, mainNodeIds, connectedNodeIds))
@@ -76,8 +73,9 @@ class ParentGivenGraphParserService<ID, T extends ParentGivenGraphNodeInput<ID, 
     }
 
     private ParentGivenGraphNodeResult<ID, T> convertToResponseNode(
-            ParentGivenGraphNodeInput<ID, T> nodeInput, Set<ID> mainNodeIds, Set<ID> connectedNodeIds
-    ) {
+            ParentGivenGraphNodeInput<ID, T> nodeInput,
+            Set<ID> mainNodeIds,
+            Set<ID> connectedNodeIds) {
         var pathType = determinePathType(nodeInput.getId(), mainNodeIds, connectedNodeIds);
         return ParentGivenGraphNodeResult.<ID, T>builder()
                 .id(nodeInput.getId())
@@ -95,21 +93,25 @@ class ParentGivenGraphParserService<ID, T extends ParentGivenGraphNodeInput<ID, 
         return PathType.OUTER;
     }
 
-    private Set<ID> findAllMainNodeIds(
-            ParentGivenGraphParseInput<ID, T> parentGivenGraphParseInput
-    ) throws GraphProcessingException {
+    private Set<ID> findAllMainNodeIds(ParentGivenGraphParseInput<ID, T> parentGivenGraphParseInput)
+            throws GraphProcessingException {
         return directionalRelationIdsFinder.findAllConnectedIds(parentGivenGraphParseInput);
     }
 
-    private Set<ID> findAllConnectedNodeIds(ID startNodeId, Set<GraphParserEdge<ID>> graphParserEdges) {
+    private Set<ID> findAllConnectedNodeIds(
+            ID startNodeId, Set<GraphParserEdge<ID>> graphParserEdges) {
         return bidirectionalRelationIdsFinder.findAllConnectedIds(startNodeId, graphParserEdges);
     }
 
     private Set<GraphParserEdge<ID>> generateEdges(Collection<T> parserInput) {
         return parserInput.stream()
-                .flatMap(nodeWrapper ->
-                        nodeWrapper.getParentIds().stream()
-                                .map(parentId -> new GraphParserEdge<>(parentId, nodeWrapper.getId())))
+                .flatMap(
+                        nodeWrapper ->
+                                nodeWrapper.getParentIds().stream()
+                                        .map(
+                                                parentId ->
+                                                        new GraphParserEdge<>(
+                                                                parentId, nodeWrapper.getId())))
                 .collect(Collectors.toSet());
     }
 }

@@ -1,9 +1,8 @@
 package org.klukov.utils.graphs.parser;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
-
-import java.util.Map;
 
 @Builder
 @RequiredArgsConstructor

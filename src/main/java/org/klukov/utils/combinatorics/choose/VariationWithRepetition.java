@@ -28,7 +28,10 @@ public final class VariationWithRepetition<T> {
         return IntStream.range(0, k)
                 .mapToObj(e -> randomFrictionQuery.getRandomFraction())
                 .map(randomNumber -> randomNumber.multiply(probabilitySum))
-                .map(randomNumber -> choosableCommons.getElementByRandom(probabilityCoefficients, randomNumber))
+                .map(
+                        randomNumber ->
+                                choosableCommons.getElementByRandom(
+                                        probabilityCoefficients, randomNumber))
                 .map(ChoosableWrapper::wrappedObject)
                 .collect(Collectors.toList());
     }

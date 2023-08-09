@@ -1,11 +1,11 @@
 package org.klukov.utils.graphs.parser;
 
+import java.util.Collection;
 import org.klukov.utils.graphs.relation.GraphNodeInput;
 import org.klukov.utils.graphs.validation.ValidatableGraphNodeInput;
 
-import java.util.Collection;
-
-public interface ParentGivenGraphNodeInput<ID, T> extends GraphNodeInput<ID>, ValidatableGraphNodeInput<ID> {
+public interface ParentGivenGraphNodeInput<ID, T>
+        extends GraphNodeInput<ID>, ValidatableGraphNodeInput<ID> {
 
     ID getId();
 

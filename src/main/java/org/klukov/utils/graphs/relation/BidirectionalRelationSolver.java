@@ -1,7 +1,5 @@
 package org.klukov.utils.graphs.relation;
 
-import org.klukov.utils.graphs.common.GraphEdge;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.klukov.utils.graphs.common.GraphEdge;
 
 class BidirectionalRelationSolver<ID> {
 
@@ -69,5 +68,4 @@ class BidirectionalRelationSolver<ID> {
                 .map(edgeBlocks::get)
                 .orElse(Collections.emptySet());
     }
-
 }

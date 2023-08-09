@@ -15,5 +15,4 @@ public record ChoosableWrapper<T>(BigDecimal probabilityCoefficient, T wrappedOb
     public ChoosableWrapper<T> copy() {
         return new ChoosableWrapper<>(probabilityCoefficient, wrappedObject);
     }
-
 }

@@ -1,10 +1,9 @@
 package org.klukov.utils.combinatorics.choose;
 
-import org.klukov.utils.java.BigDecimalUtils;
-
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Objects;
+import org.klukov.utils.java.BigDecimalUtils;
 
 class InputValidator<T> {
 
@@ -18,11 +17,13 @@ class InputValidator<T> {
         if (Objects.isNull(objects) || objects.isEmpty()) {
             throw new IllegalArgumentException("Lack of objects to choose");
         }
-        objects.forEach(object -> {
-            if (!isProbabilityCoefficientValid(object.probabilityCoefficient())) {
-                throw new IllegalArgumentException("At least one of probability coefficients is invalid");
-            }
-        });
+        objects.forEach(
+                object -> {
+                    if (!isProbabilityCoefficientValid(object.probabilityCoefficient())) {
+                        throw new IllegalArgumentException(
+                                "At least one of probability coefficients is invalid");
+                    }
+                });
     }
 
     private boolean isProbabilityCoefficientValid(BigDecimal probabilityCoefficient) {

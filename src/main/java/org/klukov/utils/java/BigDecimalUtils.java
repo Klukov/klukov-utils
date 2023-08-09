@@ -1,9 +1,8 @@
 package org.klukov.utils.java;
 
+import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-
-import java.math.BigDecimal;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BigDecimalUtils {

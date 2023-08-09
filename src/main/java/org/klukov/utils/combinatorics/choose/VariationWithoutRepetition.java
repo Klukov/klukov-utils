@@ -23,18 +23,28 @@ public final class VariationWithoutRepetition<T> {
     }
 
     public List<T> choose(Collection<ChoosableWrapper<T>> objects, int k) {
-        //todo: optimize it for big k
+        // todo: optimize it for big k
         validateInput(objects, k);
         var clonedObjects = cloneObjects(objects);
         var wrappedResults = new LinkedList<ChoosableWrapper<T>>();
-        IntStream.range(0, k).forEach(index -> {
-            var probabilityCoefficientSum = choosableCommons.calculateProbabilitySum(clonedObjects);
-            var normalizedProbabilityMap = choosableCommons.generateProbabilityCoefficientMap(clonedObjects);
-            var random = randomFrictionQuery.getRandomFraction().multiply(probabilityCoefficientSum);
-            var randomElement = choosableCommons.getElementByRandom(normalizedProbabilityMap, random);
-            wrappedResults.add(randomElement);
-            clonedObjects.remove(randomElement);
-        });
+        IntStream.range(0, k)
+                .forEach(
+                        index -> {
+                            var probabilityCoefficientSum =
+                                    choosableCommons.calculateProbabilitySum(clonedObjects);
+                            var normalizedProbabilityMap =
+                                    choosableCommons.generateProbabilityCoefficientMap(
+                                            clonedObjects);
+                            var random =
+                                    randomFrictionQuery
+                                            .getRandomFraction()
+                                            .multiply(probabilityCoefficientSum);
+                            var randomElement =
+                                    choosableCommons.getElementByRandom(
+                                            normalizedProbabilityMap, random);
+                            wrappedResults.add(randomElement);
+                            clonedObjects.remove(randomElement);
+                        });
         return wrappedResults.stream()
                 .map(ChoosableWrapper::wrappedObject)
                 .collect(Collectors.toList());
@@ -49,9 +59,6 @@ public final class VariationWithoutRepetition<T> {
     }
 
     private Collection<ChoosableWrapper<T>> cloneObjects(Collection<ChoosableWrapper<T>> objects) {
-        return objects.stream()
-                .map(ChoosableWrapper::copy)
-                .collect(Collectors.toList());
+        return objects.stream().map(ChoosableWrapper::copy).collect(Collectors.toList());
     }
-
 }
