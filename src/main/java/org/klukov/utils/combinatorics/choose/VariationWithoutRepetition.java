@@ -5,16 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.klukov.utils.combinatorics.RandomFrictionQuery;
 
 public final class VariationWithoutRepetition<T> {
 
     private final InputValidator<T> inputValidator;
     private final ChoosableCommons<T> choosableCommons;
     private final RandomFrictionQuery randomFrictionQuery;
-
-    public VariationWithoutRepetition() {
-        this(new RandomService());
-    }
 
     public VariationWithoutRepetition(RandomFrictionQuery randomFrictionQuery) {
         this.inputValidator = new InputValidator<>();
@@ -28,26 +25,26 @@ public final class VariationWithoutRepetition<T> {
         var clonedObjects = cloneObjects(objects);
         var wrappedResults = new LinkedList<ChoosableWrapper<T>>();
         IntStream.range(0, k)
-                .forEach(
-                        index -> {
-                            var probabilityCoefficientSum =
-                                    choosableCommons.calculateProbabilitySum(clonedObjects);
-                            var normalizedProbabilityMap =
-                                    choosableCommons.generateProbabilityCoefficientMap(
-                                            clonedObjects);
-                            var random =
-                                    randomFrictionQuery
-                                            .getRandomFraction()
-                                            .multiply(probabilityCoefficientSum);
-                            var randomElement =
-                                    choosableCommons.getElementByRandom(
-                                            normalizedProbabilityMap, random);
-                            wrappedResults.add(randomElement);
-                            clonedObjects.remove(randomElement);
-                        });
+                .forEach(index -> putRandomObjectToResults(clonedObjects, wrappedResults));
         return wrappedResults.stream()
                 .map(ChoosableWrapper::wrappedObject)
                 .collect(Collectors.toList());
+    }
+
+    private void putRandomObjectToResults(
+            Collection<ChoosableWrapper<T>> clonedObjects,
+            LinkedList<ChoosableWrapper<T>> wrappedResults) {
+        var randomElement = findRandomObject(clonedObjects);
+        wrappedResults.add(randomElement);
+        clonedObjects.remove(randomElement);
+    }
+
+    private ChoosableWrapper<T> findRandomObject(Collection<ChoosableWrapper<T>> clonedObjects) {
+        var probabilityCoefficientSum = choosableCommons.calculateProbabilitySum(clonedObjects);
+        var normalizedProbabilityMap =
+                choosableCommons.generateProbabilityCoefficientMap(clonedObjects);
+        var random = randomFrictionQuery.getRandomFraction().multiply(probabilityCoefficientSum);
+        return choosableCommons.getRandomElement(normalizedProbabilityMap, random);
     }
 
     private void validateInput(Collection<ChoosableWrapper<T>> objects, int k) {

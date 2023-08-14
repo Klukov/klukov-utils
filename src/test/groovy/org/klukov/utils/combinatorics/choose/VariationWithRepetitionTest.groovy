@@ -1,16 +1,18 @@
 package org.klukov.utils.combinatorics.choose
 
+import org.klukov.utils.combinatorics.CombinatoricsFacade
+import org.klukov.utils.combinatorics.RandomFrictionQuery
 import spock.lang.Specification
 
 class VariationWithRepetitionTest extends Specification {
 
     RandomFrictionQuery randomFrictionQuery = Mock()
 
-    VariationWithRepetition<String> sub = new VariationWithRepetition<>(randomFrictionQuery)
+    CombinatoricsFacade sub = new CombinatoricsFacade(randomFrictionQuery)
 
     def "should throw exception when input is invalid"() {
         when:
-        sub.choose(objects as Collection<ChoosableWrapper<String>>, k)
+        sub.chooseWithRepetition(objects as Collection<ChoosableWrapper<String>>, k)
 
         then:
         thrown(IllegalArgumentException.class)
@@ -29,7 +31,7 @@ class VariationWithRepetitionTest extends Specification {
         randomFrictionQuery.getRandomFraction() >> random
 
         when:
-        def result = sub.choose(choosables, 1)
+        def result = sub.chooseWithRepetition(choosables, 1)
 
         then:
         result.size() == 1
@@ -55,7 +57,7 @@ class VariationWithRepetitionTest extends Specification {
         randomFrictionQuery.getRandomFraction() >> 0.5
 
         when:
-        def result = sub.choose(choosables, k)
+        def result = sub.chooseWithRepetition(choosables, k)
 
         then:
         result.size() == expectedObjects
@@ -80,7 +82,7 @@ class VariationWithRepetitionTest extends Specification {
         randomFrictionQuery.getRandomFraction() >>> random
 
         when:
-        def result = sub.choose(choosables, k)
+        def result = sub.chooseWithRepetition(choosables, k)
 
         then:
         result.size() == expectedObjects.size()

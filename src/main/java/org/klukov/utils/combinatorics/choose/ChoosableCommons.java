@@ -20,7 +20,7 @@ class ChoosableCommons<T> {
         return result;
     }
 
-    ChoosableWrapper<T> getElementByRandom(
+    ChoosableWrapper<T> getRandomElement(
             TreeMap<BigDecimal, ChoosableWrapper<T>> probabilityCoefficients, BigDecimal random) {
         var highestProbabilityCoefficient = probabilityCoefficients.lastEntry();
         if (BigDecimalUtils.areEqual(highestProbabilityCoefficient.getKey(), random)) {
