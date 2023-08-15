@@ -14,7 +14,7 @@ import org.klukov.utils.graphs.validation.GraphValidator;
 import org.klukov.utils.graphs.validation.GraphValidatorFactory;
 
 @UtilityClass
-public class GraphUtils {
+public class GraphFacade {
 
     public <ID, T extends ParentGivenGraphNodeInput<ID, T>>
             ParentGivenGraphParserResult<ID, T> parseGraphCollection(

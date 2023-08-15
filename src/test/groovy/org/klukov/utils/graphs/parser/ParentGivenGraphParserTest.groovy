@@ -1,6 +1,6 @@
 package org.klukov.utils.graphs.parser
 
-import org.klukov.utils.graphs.GraphUtils
+import org.klukov.utils.graphs.GraphFacade
 import org.klukov.utils.graphs.common.GraphProcessingException
 import org.klukov.utils.graphs.common.ProcessingErrorType
 import spock.lang.Specification
@@ -12,7 +12,7 @@ class ParentGivenGraphParserTest extends Specification {
         def startNodeId = 'START'
 
         when:
-        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
+        GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -26,7 +26,7 @@ class ParentGivenGraphParserTest extends Specification {
 
     def "should throw exception if start element is null"() {
         when:
-        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), null))
+        GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), null))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -38,7 +38,7 @@ class ParentGivenGraphParserTest extends Specification {
         def startNodeId = 'notMatchedId'
 
         when:
-        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), startNodeId))
+        GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(generateOrderedSimpleGraph(), startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -50,7 +50,7 @@ class ParentGivenGraphParserTest extends Specification {
         def startNodeId = 'START'
 
         when:
-        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
+        GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -67,7 +67,7 @@ class ParentGivenGraphParserTest extends Specification {
         def startNodeId = 'START'
 
         when:
-        GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(generateGraphWithDuplicates(), startNodeId))
+        GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(generateGraphWithDuplicates(), startNodeId))
 
         then:
         def exception = thrown(GraphProcessingException.class)
@@ -81,7 +81,7 @@ class ParentGivenGraphParserTest extends Specification {
 
         when:
         ParentGivenGraphParserResult<String, ParentGivenGraphNodeInputTestImpl> result =
-                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
+                GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def nodesMap = result.graphNodes
@@ -96,7 +96,7 @@ class ParentGivenGraphParserTest extends Specification {
 
         when:
         ParentGivenGraphParserResult<String, ParentGivenGraphNodeInputTestImpl> result =
-                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
+                GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def nodesMap = result.graphNodes
@@ -116,7 +116,7 @@ class ParentGivenGraphParserTest extends Specification {
 
         when:
         ParentGivenGraphParserResult<String, ParentGivenGraphNodeInputTestImpl> result =
-                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
+                GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, startNodeId))
 
         then:
         def nodesMap = result.graphNodes
@@ -135,7 +135,7 @@ class ParentGivenGraphParserTest extends Specification {
 
         when:
         ParentGivenGraphParserResult<String, ParentGivenGraphNodeInputTestImpl> result =
-                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
+                GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
 
         then:
         def nodesMap = result.graphNodes
@@ -173,7 +173,7 @@ class ParentGivenGraphParserTest extends Specification {
 
         when:
         ParentGivenGraphParserResult<String, ParentGivenGraphNodeInputTestImpl> result =
-                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
+                GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
 
         then:
         def nodesMap = result.graphNodes
@@ -192,7 +192,7 @@ class ParentGivenGraphParserTest extends Specification {
 
         when:
         ParentGivenGraphParserResult<String, ParentGivenGraphNodeInputTestImpl> result =
-                GraphUtils.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
+                GraphFacade.parseGraphCollection(new ParentGivenGraphParseInput(graphInput, 'START'))
 
         then:
         def nodesMap = result.graphNodes
