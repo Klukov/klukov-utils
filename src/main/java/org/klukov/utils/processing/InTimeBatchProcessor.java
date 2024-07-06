@@ -16,7 +16,7 @@ public final class InTimeBatchProcessor {
     @NonNull private final Duration duration;
     @NonNull private final Supplier<Instant> currentTimeSupplier;
 
-    public InTimeBatchProcessor(Duration duration) {
+    public InTimeBatchProcessor(@NonNull Duration duration) {
         this(duration, Instant::now);
     }
 
