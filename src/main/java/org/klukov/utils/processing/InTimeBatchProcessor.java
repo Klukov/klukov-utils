@@ -23,8 +23,10 @@ public final class InTimeBatchProcessor {
     public long process(Callable<Long> processingUnit) {
         var finishDateTime = currentTimeSupplier.get().plus(duration);
         long recordsProcessed = 0;
+        log.debug("Starting processing callable batch processor");
         while (true) {
             if (processingFinished(finishDateTime)) {
+                log.debug("Finished processing callable batch processor - time limit exceeded");
                 return recordsProcessed;
             }
             long recordsProcessedInUnit;
@@ -33,11 +35,15 @@ public final class InTimeBatchProcessor {
             } catch (Exception e) {
                 return recordsProcessed;
             }
-            if (recordsProcessedInUnit > 0) {
-                recordsProcessed += recordsProcessedInUnit;
-            } else {
+            if (recordsProcessedInUnit < 1) {
+                log.debug(
+                        "Finished processing callable batch processor - no more records to process");
                 return recordsProcessed;
             }
+            recordsProcessed += recordsProcessedInUnit;
+            log.debug(
+                    "Processing callable batch processor - processed number of records: {}",
+                    recordsProcessed);
         }
     }
 
@@ -45,16 +51,24 @@ public final class InTimeBatchProcessor {
             Supplier<C> recordsProvider, Consumer<C> recordsConsumer) {
         var finishDateTime = currentTimeSupplier.get().plus(duration);
         long recordsProcessed = 0;
+        log.debug("Starting processing supplier-consumer batch processor");
         while (true) {
             if (processingFinished(finishDateTime)) {
+                log.debug(
+                        "Finished processing supplier-consumer batch processor - time limit exceeded");
                 return recordsProcessed;
             }
             var recordsToProcess = recordsProvider.get();
             if (recordsToProcess.isEmpty()) {
+                log.debug(
+                        "Finished processing supplier-consumer batch processor - no more records to process");
                 return recordsProcessed;
             }
             recordsConsumer.accept(recordsToProcess);
             recordsProcessed += recordsToProcess.size();
+            log.debug(
+                    "Processing supplier-consumer batch processor - processed number of records: {}",
+                    recordsProcessed);
         }
     }
 
