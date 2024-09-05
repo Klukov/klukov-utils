@@ -13,7 +13,7 @@ public class ConcurrentProcessor<ID> {
 
     public void process(ID id, Runnable runnable) {
         log.info("Incoming request to process runnable with id = {}", id);
-        var lock = LOCK_MAP.compute(id, (key, value) -> computeInitialAtomicInteger(value));
+        var lock = LOCK_MAP.compute(id, (key, value) -> createOrIncrement(value));
         log.info("Acquired lock for id = {}", id);
         synchronized (lock) {
             log.info("Processing runnable with id = {}", id);
@@ -24,7 +24,7 @@ public class ConcurrentProcessor<ID> {
         log.info("Lock released with id = {}", id);
     }
 
-    @NonNull private AtomicInteger computeInitialAtomicInteger(AtomicInteger value) {
+    @NonNull private AtomicInteger createOrIncrement(AtomicInteger value) {
         return value == null ? new AtomicInteger(1) : increment(value);
     }
 
