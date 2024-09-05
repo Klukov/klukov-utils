@@ -44,8 +44,8 @@ class ConcurrentProcessorTest extends Specification {
         cyclicBarrier.await()
 
         then:
-        simpleAwait().until(() -> initCounter.get() == finishCounter.get())
-        subject.LOCK_MAP.size() == 0
+        simpleAwait().until(() -> subject.LOCK_MAP.size() == 0)
+        assert numberOfThreads == finishCounter.get()
 
         cleanup:
         executor.shutdown()
