@@ -68,16 +68,19 @@ class ConcurrentProcessorTest extends Specification {
             subject.process(processId, blockingProcess(initCounter, firstCB, finishCounter))
         }
         simpleAwait().until(() -> insideFirstTask(initCounter, finishCounter))
+        assert subject.LOCK_MAP[processId].get() == 1
 
         // Second task
         executor.submit {
             subject.process(processId, blockingProcess(initCounter, secondCB, finishCounter))
         }
+        simpleAwait().until(() -> subject.LOCK_MAP[processId].get() == 2)
         assert insideFirstTask(initCounter, finishCounter)
 
         // release the first task
         firstCB.await()
         simpleAwait().until(() -> insideSecondTask(initCounter, finishCounter))
+        assert subject.LOCK_MAP[processId].get() == 1
 
         // release the second task
         secondCB.await()
