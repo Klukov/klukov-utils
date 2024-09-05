@@ -1,95 +1,122 @@
 package org.klukov.utils.processing
 
-import java.util.concurrent.CountDownLatch
+import groovyjarjarantlr4.v4.runtime.misc.NotNull
+import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import org.awaitility.Awaitility
+import org.awaitility.core.ConditionFactory
 import spock.lang.Specification
 
 class ConcurrentProcessorTest extends Specification {
 
     def "should run single process"() {
         given:
-        def sub = new ConcurrentProcessor<Long>()
+        def subject = new ConcurrentProcessor<Long>()
         def incrementor = new AtomicInteger(0)
 
         when:
-        sub.process(1L, () -> incrementor.incrementAndGet())
+        subject.process(1L, () -> incrementor.incrementAndGet())
 
         then:
         incrementor.get() == 1
+        subject.LOCK_MAP.size() == 0
     }
 
-    def "should run multiple processed with different ids"() {
+    def "should run multiple processes with different ids"() {
         given:
-        def processor = new ConcurrentProcessor<Integer>()
-        def counter = new AtomicInteger(0)
-        def numberOfThreads = 8
-        def latch = new CountDownLatch(numberOfThreads)
+        def subject = new ConcurrentProcessor<Integer>()
+        def initCounter = new AtomicInteger(0)
+        def finishCounter = new AtomicInteger(0)
+        def numberOfThreads = 32
+        def cyclicBarrier = new CyclicBarrier(numberOfThreads + 1)
 
         when:
         def executor = Executors.newFixedThreadPool(numberOfThreads)
 
         (1..numberOfThreads).each { i ->
             executor.submit {
-                processor.process(i, {
-                    counter.incrementAndGet()
-                    latch.countDown()
-                } as Runnable)
-            }
-        }
+                subject.process(i, blockingProcess(initCounter, cyclicBarrier, finishCounter)) }}
 
-        latch.await(2, TimeUnit.SECONDS)
+        simpleAwait().until(() -> initCounter.get() == numberOfThreads)
+        assert finishCounter.get() == 0
+        cyclicBarrier.await()
 
         then:
-        counter.get() == numberOfThreads
+        simpleAwait().until(() -> initCounter.get() == finishCounter.get())
+        subject.LOCK_MAP.size() == 0
 
         cleanup:
         executor.shutdown()
     }
 
-    def "should block multiple processes with the same id"() {
+    def "should block two processes with the same id"() {
         given:
-        def processor = new ConcurrentProcessor<Integer>()
-        def counter = new AtomicInteger(0)
+        def subject = new ConcurrentProcessor<Integer>()
+        def initCounter = new AtomicInteger(0)
+        def finishCounter = new AtomicInteger(0)
         def processId = 999
-        def firstLatch = new CountDownLatch(1) // to ensure the first task starts before the second
-        def secondLatch = new CountDownLatch(1) // second latch to block first task
+        def firstCB = new CyclicBarrier(2)
+        def secondCB = new CyclicBarrier(2)
 
         when:
         def executor = Executors.newFixedThreadPool(2)
 
         // First task
         executor.submit {
-            processor.process(processId, {
-                counter.incrementAndGet()
-                firstLatch.countDown()
-                secondLatch.await(3, TimeUnit.SECONDS)
-            } as Runnable)
+            subject.process(processId, blockingProcess(initCounter, firstCB, finishCounter))
         }
+        simpleAwait().until(() -> insideFirstTask(initCounter, finishCounter))
 
-        // Ensure the first task has started and acquired the lock
-        firstLatch.await(1, TimeUnit.SECONDS)
-        assert counter.get() == 1
-
-        // Second task with the same ID
+        // Second task
         executor.submit {
-            processor.process(processId, {
-                counter.incrementAndGet()
-            } as Runnable)
+            subject.process(processId, blockingProcess(initCounter, secondCB, finishCounter))
         }
+        assert insideFirstTask(initCounter, finishCounter)
 
-        Thread.sleep(500) // wait to ensure that second task is blocked
-        assert counter.get() == 1
+        // release the first task
+        firstCB.await()
+        simpleAwait().until(() -> insideSecondTask(initCounter, finishCounter))
 
-        // release first task
-        secondLatch.countDown()
-        Thread.sleep(500) // wait to ensure that second task is released and processed
+        // release the second task
+        secondCB.await()
 
         then:
-        counter.get() == 2
+        simpleAwait().until(() -> bothTasksFinished(initCounter, finishCounter))
+        subject.LOCK_MAP.size() == 0
 
         cleanup:
         executor.shutdown()
+    }
+
+    private static Runnable blockingProcess(
+            @NotNull AtomicInteger initCounter,
+            @NotNull CyclicBarrier cyclicBarrier,
+            @NotNull AtomicInteger finishCounter) {
+        () -> {
+            initCounter.incrementAndGet()
+            cyclicBarrier.await(5, TimeUnit.SECONDS)
+            finishCounter.incrementAndGet()
+        }
+    }
+
+    private static boolean insideFirstTask(AtomicInteger initCounter, AtomicInteger finishCounter) {
+        initCounter.get() == 1 && finishCounter.get() == 0
+    }
+
+    private static boolean insideSecondTask(AtomicInteger initCounter, AtomicInteger finishCounter) {
+        initCounter.get() == 2 && finishCounter.get() == 1
+    }
+
+    private static boolean bothTasksFinished(AtomicInteger initCounter, AtomicInteger finishCounter) {
+        initCounter.get() == 2 && finishCounter.get() == 2
+    }
+
+    private static ConditionFactory simpleAwait(int seconds = 1) {
+        Awaitility.await()
+                .atMost(seconds, TimeUnit.SECONDS)
+                .pollDelay(1, TimeUnit.MILLISECONDS)
+                .pollInterval(1, TimeUnit.MILLISECONDS)
     }
 }
