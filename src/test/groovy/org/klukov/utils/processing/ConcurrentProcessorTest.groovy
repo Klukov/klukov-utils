@@ -24,6 +24,18 @@ class ConcurrentProcessorTest extends Specification {
         subject.LOCK_MAP.size() == 0
     }
 
+    def "should lock map be empty when runnable throws exception"() {
+        given:
+        def subject = new ConcurrentProcessor<Long>()
+
+        when:
+        subject.process(1L, { throw new RuntimeException("test") })
+
+        then:
+        thrown(RuntimeException.class)
+        subject.LOCK_MAP.size() == 0
+    }
+
     def "should run multiple processes with different ids"() {
         given:
         def subject = new ConcurrentProcessor<Integer>()

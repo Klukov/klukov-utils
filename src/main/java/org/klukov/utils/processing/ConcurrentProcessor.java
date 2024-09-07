@@ -17,9 +17,12 @@ public class ConcurrentProcessor<ID> {
         log.info("Acquired lock for id = {}", id);
         synchronized (lock) {
             log.info("Processing runnable with id = {}", id);
-            runnable.run();
-            log.info("Finished processing runnable with id = {}", id);
-            LOCK_MAP.computeIfPresent(id, (key, value) -> decrement(value).orElse(null));
+            try {
+                runnable.run();
+            } finally {
+                log.info("Finished processing runnable with id = {}", id);
+                LOCK_MAP.computeIfPresent(id, (key, value) -> decrement(value).orElse(null));
+            }
         }
         log.info("Lock released with id = {}", id);
     }
