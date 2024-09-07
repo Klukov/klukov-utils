@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'groovy'
-    id 'com.diffplug.spotless' version '6.20.0'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group 'org.klukov'
@@ -13,12 +13,13 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
-    implementation 'org.slf4j:slf4j-simple:1.7.36'
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
 
-    testImplementation 'org.spockframework:spock-core:2.2-groovy-3.0'
-    testImplementation 'org.codehaus.groovy:groovy:3.0.12'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.16'
+    testImplementation 'org.spockframework:spock-core:2.4-M4-groovy-3.0'
+    testImplementation 'org.codehaus.groovy:groovy:3.0.22'
     testImplementation 'org.awaitility:awaitility:4.2.2'
 }
 
