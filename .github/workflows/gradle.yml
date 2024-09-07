@@ -1,4 +1,4 @@
-name: example-clinic gradle build
+name: klukov-utils gradle build
 
 on:
   push:
