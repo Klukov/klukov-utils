@@ -3,6 +3,7 @@ package org.klukov.utils.processing;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,19 +13,32 @@ public class ConcurrentProcessor<ID> {
     private final ConcurrentHashMap<ID, AtomicInteger> LOCK_MAP = new ConcurrentHashMap<>();
 
     public void process(ID id, Runnable runnable) {
-        log.info("Incoming request to process runnable with id = {}", id);
+        executeWithLock(
+                id,
+                () -> {
+                    runnable.run();
+                    return null;
+                });
+    }
+
+    public <T> T process(ID id, Supplier<T> supplier) {
+        return executeWithLock(id, supplier);
+    }
+
+    private <T> T executeWithLock(ID id, Supplier<T> supplier) {
+        log.debug("Incoming request with id = {}", id);
         var lock = LOCK_MAP.compute(id, (key, value) -> createOrIncrement(value));
-        log.info("Acquired lock for id = {}", id);
+        log.debug("Acquired lock for id = {}", id);
         synchronized (lock) {
-            log.info("Processing runnable with id = {}", id);
+            log.debug("Processing id = {}", id);
             try {
-                runnable.run();
+                return supplier.get();
             } finally {
-                log.info("Finished processing runnable with id = {}", id);
+                log.debug("Finished processing with id = {}", id);
                 LOCK_MAP.computeIfPresent(id, (key, value) -> decrement(value).orElse(null));
+                log.debug("Lock removed with id = {}", id);
             }
         }
-        log.info("Lock released with id = {}", id);
     }
 
     @NonNull private AtomicInteger createOrIncrement(AtomicInteger value) {

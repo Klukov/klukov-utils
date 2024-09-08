@@ -5,13 +5,14 @@ import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.Supplier
 import org.awaitility.Awaitility
 import org.awaitility.core.ConditionFactory
 import spock.lang.Specification
 
 class ConcurrentProcessorTest extends Specification {
 
-    def "should run single process"() {
+    def "should run single runnable"() {
         given:
         def subject = new ConcurrentProcessor<Long>()
         def incrementor = new AtomicInteger(0)
@@ -20,6 +21,20 @@ class ConcurrentProcessorTest extends Specification {
         subject.process(1L, () -> incrementor.incrementAndGet())
 
         then:
+        incrementor.get() == 1
+        subject.LOCK_MAP.size() == 0
+    }
+
+    def "should run single supplier"() {
+        given:
+        def subject = new ConcurrentProcessor<Long>()
+        def incrementor = new AtomicInteger(0)
+
+        when:
+        def result = subject.process(1L, { incrementor.incrementAndGet() } as Supplier)
+
+        then:
+        result == 1
         incrementor.get() == 1
         subject.LOCK_MAP.size() == 0
     }
