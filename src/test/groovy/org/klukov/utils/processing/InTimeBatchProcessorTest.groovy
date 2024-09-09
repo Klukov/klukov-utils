@@ -129,7 +129,7 @@ class InTimeBatchProcessorTest extends Specification {
 
     def "should process supplier-consumer records without batch processor time provider"() {
         given:
-        def inTimeBatchProcessor = new InTimeBatchProcessor(Duration.ofMillis(1))
+        def inTimeBatchProcessor = new InTimeBatchProcessor(Duration.ofMillis(10))
         def supplierResult = fourElementsSupplier()[0]
         supplierMock.get() >> supplierResult
 
