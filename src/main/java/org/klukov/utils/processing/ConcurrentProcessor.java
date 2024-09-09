@@ -13,7 +13,7 @@ public class ConcurrentProcessor<ID> {
     private final ConcurrentHashMap<ID, AtomicInteger> LOCK_MAP = new ConcurrentHashMap<>();
 
     public void process(ID id, Runnable runnable) {
-        executeWithLock(
+        process(
                 id,
                 () -> {
                     runnable.run();
@@ -22,10 +22,6 @@ public class ConcurrentProcessor<ID> {
     }
 
     public <T> T process(ID id, Supplier<T> supplier) {
-        return executeWithLock(id, supplier);
-    }
-
-    private <T> T executeWithLock(ID id, Supplier<T> supplier) {
         log.debug("Incoming request with id = {}", id);
         var lock = LOCK_MAP.compute(id, (key, value) -> createOrIncrement(value));
         log.debug("Acquired lock for id = {}", id);
