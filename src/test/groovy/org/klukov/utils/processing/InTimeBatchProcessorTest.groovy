@@ -12,13 +12,15 @@ import spock.lang.Specification
 
 class InTimeBatchProcessorTest extends Specification {
 
+    private static final TEST_PROCESS_NAME = "TEST-PROCESS";
+
     Callable<Long> callableMock = Mock()
     Supplier<List<String>> supplierMock = Mock()
     Consumer<List<String>> consumerMock = Mock()
 
     def "should stop processing callable records when no record processed in last call"() {
         given:
-        def inTimeBatchProcessor = new InTimeBatchProcessor(Duration.ofMinutes(1), () -> nowInstant())
+        def inTimeBatchProcessor = new InTimeBatchProcessor(longProcessingWithGivenTimeSupplier())
 
         when:
         def result = inTimeBatchProcessor.process(callableMock)
@@ -40,7 +42,7 @@ class InTimeBatchProcessorTest extends Specification {
         timeSupplier.get() >>> timeSupplierResponse // first call to calculate finish dateTime
 
         when:
-        def inTimeBatchProcessor = new InTimeBatchProcessor(Duration.ofHours(2), timeSupplier)
+        def inTimeBatchProcessor = new InTimeBatchProcessor(longProcessingPropertiesWithTimeSupplier(timeSupplier))
         def result = inTimeBatchProcessor.process(callableMock)
 
         then:
@@ -57,7 +59,7 @@ class InTimeBatchProcessorTest extends Specification {
 
     def "should stop processing when callable throw an error"() {
         given:
-        def inTimeBatchProcessor = new InTimeBatchProcessor(Duration.ofMinutes(1), () -> nowInstant())
+        def inTimeBatchProcessor = new InTimeBatchProcessor(longProcessingWithGivenTimeSupplier())
 
         when:
         def result = inTimeBatchProcessor.process(callableMock)
@@ -74,7 +76,7 @@ class InTimeBatchProcessorTest extends Specification {
 
     def "should process callable without batch processor time provider"() {
         given:
-        def inTimeBatchProcessor = new InTimeBatchProcessor(Duration.ofMillis(1))
+        def inTimeBatchProcessor = new InTimeBatchProcessor(quickProcessingPropertiesWithoutTimeProvider())
         callableMock.call() >> 10L
 
         when:
@@ -88,7 +90,7 @@ class InTimeBatchProcessorTest extends Specification {
     def "should stop processing supplier-consumer records when no records returned by supplier"() {
         given:
         supplierMock.get() >>> supplierResponse
-        def inTimeBatchProcessor = new InTimeBatchProcessor(Duration.ofMinutes(1), () -> nowInstant())
+        def inTimeBatchProcessor = new InTimeBatchProcessor(longProcessingWithGivenTimeSupplier())
 
         when:
         def result = inTimeBatchProcessor.process(supplierMock, consumerMock)
@@ -112,7 +114,7 @@ class InTimeBatchProcessorTest extends Specification {
         timeSupplier.get() >>> timeSupplierResponse // first call to calculate finish dateTime
 
         when:
-        def inTimeBatchProcessor = new InTimeBatchProcessor(Duration.ofHours(2), timeSupplier)
+        def inTimeBatchProcessor = new InTimeBatchProcessor(longProcessingPropertiesWithTimeSupplier(timeSupplier))
         def result = inTimeBatchProcessor.process(supplierMock, consumerMock)
 
         then:
@@ -129,7 +131,7 @@ class InTimeBatchProcessorTest extends Specification {
 
     def "should process supplier-consumer records without batch processor time provider"() {
         given:
-        def inTimeBatchProcessor = new InTimeBatchProcessor(Duration.ofMillis(10))
+        def inTimeBatchProcessor = new InTimeBatchProcessor(quickProcessingPropertiesWithoutTimeProvider())
         def supplierResult = fourElementsSupplier()[0]
         supplierMock.get() >> supplierResult
 
@@ -139,7 +141,36 @@ class InTimeBatchProcessorTest extends Specification {
         then:
         result % supplierResult.size() == 0
         result / supplierResult.size() > 0
-        println("RESULT: " + result)
+    }
+
+    def "should process supplier-consumer records with processName"() {
+        given:
+        def inTimeBatchProcessor = new InTimeBatchProcessor(quickProcessingPropertiesWithoutTimeProvider())
+        def supplierResult = fourElementsSupplier()[0]
+        supplierMock.get() >> supplierResult
+
+        when:
+        def result = inTimeBatchProcessor.process(supplierMock, consumerMock)
+
+        then:
+        result % supplierResult.size() == 0
+        result / supplierResult.size() > 0
+    }
+
+    private static InTimeBatchProcessorProperties quickProcessingPropertiesWithoutTimeProvider() {
+        InTimeBatchProcessorProperties.of(Duration.ofMillis(10))
+    }
+
+    private static InTimeBatchProcessorProperties longProcessingPropertiesWithTimeSupplier(Supplier<Instant> timeSupplier) {
+        InTimeBatchProcessorProperties.of(Duration.ofHours(2), timeSupplier)
+    }
+
+    private static InTimeBatchProcessorProperties longProcessingWithGivenTimeSupplier() {
+        InTimeBatchProcessorProperties.builder()
+                .processName(TEST_PROCESS_NAME)
+                .duration(Duration.ofMinutes(1))
+                .currentTimeSupplier(() -> nowInstant())
+                .build()
     }
 
     private static List<Instant> nowRepeatsAndThen(int instantRepeats, Instant... last) {

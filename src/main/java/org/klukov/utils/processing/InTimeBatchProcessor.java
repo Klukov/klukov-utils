@@ -7,41 +7,48 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RequiredArgsConstructor
 public final class InTimeBatchProcessor {
     @NonNull private final Duration duration;
     @NonNull private final Supplier<Instant> currentTimeSupplier;
+    private final String processNameMessage;
 
-    public InTimeBatchProcessor(@NonNull Duration duration) {
-        this(duration, Instant::now);
+    public InTimeBatchProcessor(
+            @NonNull InTimeBatchProcessorProperties inTimeBatchProcessorProperties) {
+        this.duration = inTimeBatchProcessorProperties.duration();
+        this.currentTimeSupplier = inTimeBatchProcessorProperties.currentTimeSupplier();
+        this.processNameMessage =
+                inTimeBatchProcessorProperties
+                        .getProcessName()
+                        .map(name -> "PROCESS NAME: " + name + " | ")
+                        .orElse(null);
     }
 
     public long process(Callable<Long> processingUnit) {
         var finishDateTime = currentTimeSupplier.get().plus(duration);
         long recordsProcessed = 0;
-        log.debug("Starting processing callable batch processor");
+        logDebug("Starting processing callable batch processor");
         while (true) {
             if (processingFinished(finishDateTime)) {
-                log.debug("Finished processing callable batch processor - time limit exceeded");
+                logDebug("Finished processing callable batch processor - time limit exceeded");
                 return recordsProcessed;
             }
             long recordsProcessedInUnit;
             try {
                 recordsProcessedInUnit = processingUnit.call();
             } catch (Exception e) {
+                logError("Callable batch processor threw an error", e);
                 return recordsProcessed;
             }
             if (recordsProcessedInUnit < 1) {
-                log.debug(
+                logDebug(
                         "Finished processing callable batch processor - no more records to process");
                 return recordsProcessed;
             }
             recordsProcessed += recordsProcessedInUnit;
-            log.debug(
+            logDebug(
                     "Processing callable batch processor - processed number of records: {}",
                     recordsProcessed);
         }
@@ -51,24 +58,48 @@ public final class InTimeBatchProcessor {
             Supplier<C> recordsProvider, Consumer<C> recordsConsumer) {
         var finishDateTime = currentTimeSupplier.get().plus(duration);
         long recordsProcessed = 0;
-        log.debug("Starting processing supplier-consumer batch processor");
+        logDebug("Starting processing supplier-consumer batch processor");
         while (true) {
             if (processingFinished(finishDateTime)) {
-                log.debug(
+                logDebug(
                         "Finished processing supplier-consumer batch processor - time limit exceeded");
                 return recordsProcessed;
             }
             var recordsToProcess = recordsProvider.get();
             if (recordsToProcess.isEmpty()) {
-                log.debug(
+                logDebug(
                         "Finished processing supplier-consumer batch processor - no more records to process");
                 return recordsProcessed;
             }
             recordsConsumer.accept(recordsToProcess);
             recordsProcessed += recordsToProcess.size();
-            log.debug(
+            logDebug(
                     "Processing supplier-consumer batch processor - processed number of records: {}",
                     recordsProcessed);
+        }
+    }
+
+    private void logError(String message, Exception exception) {
+        if (processNameMessage != null) {
+            log.error(processNameMessage + message, exception);
+        } else {
+            log.error(message);
+        }
+    }
+
+    private void logDebug(String message) {
+        if (processNameMessage != null) {
+            log.debug("{}{}", processNameMessage, message);
+        } else {
+            log.debug(message);
+        }
+    }
+
+    private void logDebug(String message, Object object) {
+        if (processNameMessage != null) {
+            log.debug(processNameMessage + message, object);
+        } else {
+            log.debug(message);
         }
     }
 
