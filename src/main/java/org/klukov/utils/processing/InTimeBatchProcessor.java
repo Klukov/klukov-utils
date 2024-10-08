@@ -83,7 +83,7 @@ public final class InTimeBatchProcessor {
         if (processNameMessage != null) {
             log.error(processNameMessage + message, exception);
         } else {
-            log.error(message);
+            log.error(message, exception);
         }
     }
 
@@ -99,7 +99,7 @@ public final class InTimeBatchProcessor {
         if (processNameMessage != null) {
             log.debug(processNameMessage + message, object);
         } else {
-            log.debug(message);
+            log.debug(message, object);
         }
     }
 
