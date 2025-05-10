@@ -83,7 +83,7 @@ class ConcurrentProcessorTest extends Specification {
         def subject = new ConcurrentProcessor<Integer>()
         def initCounter = new AtomicInteger(0)
         def finishCounter = new AtomicInteger(0)
-        def processId = 999
+        def processId = 9999
         def firstCB = new CyclicBarrier(2)
         def secondCB = new CyclicBarrier(2)
 
@@ -92,14 +92,14 @@ class ConcurrentProcessorTest extends Specification {
 
         // First task
         executor.submit {
-            subject.process(processId, blockingProcess(initCounter, firstCB, finishCounter))
+            subject.process(Integer.valueOf(processId), blockingProcess(initCounter, firstCB, finishCounter))
         }
         simpleAwait().until(() -> insideFirstTask(initCounter, finishCounter))
         assert subject.LOCK_MAP[processId].get() == 1
 
         // Second task
         executor.submit {
-            subject.process(processId, blockingProcess(initCounter, secondCB, finishCounter))
+            subject.process(Integer.valueOf(processId), blockingProcess(initCounter, secondCB, finishCounter))
         }
         simpleAwait().until(() -> subject.LOCK_MAP[processId].get() == 2)
         assert insideFirstTask(initCounter, finishCounter)
