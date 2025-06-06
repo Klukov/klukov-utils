@@ -1,6 +1,5 @@
 package org.klukov.utils.structures;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -51,10 +50,10 @@ public class ConcurrentAddRemoveListInMap<K, E> {
      * <p>This implementation uses ConcurrentLinkedQueue as the underlying collection.
      *
      * <p>Note: There is a trade-off with consistency. During concurrent operations, it's possible
-     * that when calling getElements(K key) while two deletions occur, the result may represent a
-     * state that never actually existed in the collection. This happens because the first element
-     * might be removed from the internal collection but copied during iteration, while the second
-     * element might be deleted before being copied to the result list.
+     * that when calling getCopyOfElements(K key) while two deletions occur, the result may
+     * represent a state that never actually existed in the collection. This happens because the
+     * first element might be removed from the internal collection but copied during iteration,
+     * while the second element might be deleted before being copied to the result list.
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the lists
@@ -73,7 +72,7 @@ public class ConcurrentAddRemoveListInMap<K, E> {
      * <p>Note: Long lists for the same map key can cause increased processing times for add/remove
      * operations. This implementation should only be used when complete consistency is necessary.
      * Unlike the {@link #highConcurrentListInMap()}, this implementation does not suffer from the
-     * consistency issues where getElements might return a state that never existed.
+     * consistency issues where getCopyOfElements might return a state that never existed.
      *
      * @param <K> the type of keys maintained by this map
      * @param <E> the type of elements in the lists
@@ -84,24 +83,24 @@ public class ConcurrentAddRemoveListInMap<K, E> {
     }
 
     /**
-     * Returns a list of elements associated with the given key. If the key is not present, it
-     * returns an empty list. The returned list is a copy to ensure thread safety.
+     * Returns immutable list of elements associated with the given key. If the key is not present,
+     * it returns an empty list. The returned list is a copy to ensure thread safety.
      *
      * @param key the key whose associated elements are to be returned
-     * @return a list containing the elements associated with the key
+     * @return immutable list containing the elements associated with the key
      */
-    public @NonNull List<E> getElements(@NonNull K key) {
+    public @NonNull List<E> getCopyOfElements(@NonNull K key) {
         var collection = storage.get(key);
         if (collection == null) {
             return Collections.emptyList();
         }
-        // Return a copy of the queue to ensure thread safety
-        return new ArrayList<>(collection);
+        // Return an immutable copy of the collection to ensure thread safety
+        return List.copyOf(collection);
     }
 
     /**
      * Adds the specified value to the list associated with the specified key. If the key is not
-     * present, creates a new list.
+     * present, create a new list.
      *
      * @param key the key with which the specified value is to be associated
      * @param value the value to be added to the list associated with the key

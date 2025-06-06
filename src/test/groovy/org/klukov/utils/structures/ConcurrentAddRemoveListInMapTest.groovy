@@ -16,9 +16,9 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
         sub.add("key2", 3)
 
         then:
-        sub.getElements("key1").sort() == [1, 2]
-        sub.getElements("key2") == [3]
-        sub.getElements("key3") == []
+        new ArrayList<>(sub.getCopyOfElements("key1")).sort() == [1, 2]
+        sub.getCopyOfElements("key2") == [3]
+        sub.getCopyOfElements("key3") == []
 
         where:
         name         | sub                                                                           || _
@@ -36,20 +36,20 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
         sub.remove("key1", 1)
 
         then:
-        sub.getElements("key1") == [2]
-        sub.getElements("key2") == [3]
+        sub.getCopyOfElements("key1") == [2]
+        sub.getCopyOfElements("key2") == [3]
 
         when:
         sub.remove("key1", 2)
 
         then:
-        sub.getElements("key1") == []
+        sub.getCopyOfElements("key1") == []
 
         when:
         sub.remove("key2", 3)
 
         then:
-        sub.getElements("key2") == []
+        sub.getCopyOfElements("key2") == []
 
         and:
         sub.storage.size() == 0
@@ -86,9 +86,9 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
         latch.await(10, TimeUnit.SECONDS)
 
         then:
-        def elements = sub.getElements("key")
+        def elements = sub.getCopyOfElements("key")
         elements.size() == expectedNumElements
-        elements.sort() == (0..<expectedNumElements)
+        new ArrayList<>(elements).sort() == (0..<expectedNumElements)
 
         cleanup:
         executor.shutdown()
@@ -131,7 +131,7 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
         latch.await(10, TimeUnit.SECONDS)
 
         then:
-        sub.getElements("key").isEmpty()
+        sub.getCopyOfElements("key").isEmpty()
         sub.storage.size() == 0
 
         cleanup:
@@ -174,7 +174,7 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
         latch.await(10, TimeUnit.SECONDS)
 
         then:
-        sub.getElements("key").isEmpty()
+        sub.getCopyOfElements("key").isEmpty()
         sub.storage.size() == 0
 
         cleanup:
@@ -216,9 +216,9 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
         then:
         numThreads.times { threadId ->
             def key = "key" + threadId
-            def elements = sub.getElements(key)
+            def elements = sub.getCopyOfElements(key)
             assert elements.size() == expectedNumElements
-            assert elements.sort() == (0..<expectedNumElements)
+            assert new ArrayList<>(elements).sort() == (0..<expectedNumElements)
         }
 
         cleanup:
@@ -267,7 +267,7 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
         then:
         numThreads.times { threadId ->
             def key = "key" + threadId
-            assert sub.getElements(key).isEmpty()
+            assert sub.getCopyOfElements(key).isEmpty()
         }
         sub.storage.size() == 0
 
@@ -317,7 +317,7 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
             latch.await(5, TimeUnit.SECONDS)
 
             // Verify the result: "key": [2]
-            def elements = sub.getElements(key)
+            def elements = sub.getCopyOfElements(key)
             assert elements == [2]
 
             // Clean up for the next iteration
@@ -325,7 +325,7 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
         }
 
         then:
-        sub.getElements(key).isEmpty()
+        sub.getCopyOfElements(key).isEmpty()
         sub.storage.size() == 0
 
         cleanup:
@@ -380,10 +380,10 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
         latch.await(5, TimeUnit.SECONDS)
 
         then:
-        def elements = sub.getElements(key)
+        def elements = sub.getCopyOfElements(key)
         elements.size() == numElements
         elements.every { it % 2 == 0 }
-        elements.sort() == (0..<numElements).collect { 2 * it }
+        new ArrayList<>(elements).sort() == (0..<numElements).collect { 2 * it }
 
         cleanup:
         executor.shutdown()
@@ -414,7 +414,7 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
             }
         }
 
-        def elements = sub.getElements(key)
+        def elements = sub.getCopyOfElements(key)
         syncBarrier.await(5, TimeUnit.SECONDS)
 
         // Iterate through the elements while they're being removed from the map
@@ -429,7 +429,7 @@ class ConcurrentAddRemoveListInMapTest extends Specification {
                 .atMost(5, TimeUnit.SECONDS)
                 .pollDelay(1, TimeUnit.MILLISECONDS)
                 .pollInterval(1, TimeUnit.MILLISECONDS)
-                .until(() -> sub.getElements(key).isEmpty())
+                .until(() -> sub.getCopyOfElements(key).isEmpty())
         sub.storage.size() == 0
 
         cleanup:
